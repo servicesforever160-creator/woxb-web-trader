@@ -7,6 +7,8 @@ import { useTopbarInstruments } from "./useTopbarInstruments";
 import type { Instrument } from "./instruments.data";
 import type { Theme } from "../hooks/useTheme";
 import { Moon, Sun } from "lucide-react";
+import Image from "next/image";
+import { motion } from "framer-motion";
 
 function TrendChart({ trend }: { trend: Instrument["trend"] }) {
   const isUp = trend === "up";
@@ -32,7 +34,7 @@ type TickerCardProps = {
 function TickerCard({ ticker, active, onSelect }: TickerCardProps) {
   const isUp = ticker.trend === "up";
   return (
-    <button type="button" className={`ticker-card !transition-all !duration-300 !ease-out hover:-translate-y-0.5 hover:shadow-[0_6px_18px_rgba(212,168,83,0.14)] active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#D4A853]/40 motion-reduce:transform-none motion-reduce:!transition-none${active ? " active shadow-[0_5px_16px_rgba(212,168,83,0.18)]" : ""}`} onClick={() => onSelect(ticker.symbol)} aria-pressed={active}>
+    <button type="button" className={`ticker-card !transition-all !duration-300 !ease-out hover:-translate-y-0.5 hover:shadow-[0_6px_18px_rgba(212,168,83,0.14)] active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#F5B800]/40 motion-reduce:transform-none motion-reduce:!transition-none${active ? " active shadow-[0_5px_16px_rgba(212,168,83,0.18)]" : ""}`} onClick={() => onSelect(ticker.symbol)} aria-pressed={active}>
       <InstrumentIcon type={ticker.icon} />
       <div className="ticker-copy">
         <span className="ticker-symbol">{ticker.symbol}</span>
@@ -62,13 +64,45 @@ export default function TopBar({ theme, onThemeToggle }: TopBarProps) {
 
   return (
     <header className="top-bar-panel">
-      <Link className="paxivo-logo" href="/" aria-label="Paxivo home"><span className="paxivo-logo-mark" aria-hidden="true">P</span><span>PAXIVO</span></Link>
+      <Link className="paxivo-logo" href="/" aria-label="Paxivo home">
+        <motion.div
+          whileHover={{
+            scale: 1.05,
+            rotate: 2,
+          }}
+          whileTap={{
+            scale: 0.97,
+          }}
+          transition={{
+            type: "spring",
+            stiffness: 400,
+            damping: 22,
+          }}
+          className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden"
+        >
+          <Image
+            src={
+              theme === "dark"
+                ? "/assets/logos-dark/logo-short.png"
+                : "/assets/logos-light/logo-short.png"
+            }
+            alt="App Logo"
+            width={62}
+            height={62}
+            className="size-full object-contain"
+            priority
+          />
+        </motion.div>
+        <span>
+          {process.env.NEXT_PUBLIC_APP_NAME}
+        </span>
+      </Link>
       <div className="ticker-list" aria-label="Market ticker">
         {instruments.map((ticker) => <TickerCard key={ticker.symbol} ticker={ticker} active={ticker.symbol === activeSymbol} onSelect={setActiveSymbol} />)}
       </div>
       <div className="topbar-actions">
-        <button type="button" className="topbar-action !transition-all !duration-300 !ease-out hover:-translate-y-0.5 hover:border-[#D4A853] hover:shadow-[0_5px_14px_rgba(212,168,83,0.16)] active:translate-y-0 active:scale-95 focus-visible:ring-2 focus-visible:ring-[#D4A853]/40 motion-reduce:transform-none motion-reduce:!transition-none" aria-label="Add instrument" aria-haspopup="dialog" onClick={() => setIsInstrumentModalOpen(true)}>+</button>
-        <button type="button" className="topbar-action theme-toggle !transition-all !duration-300 !ease-out hover:-translate-y-0.5 hover:border-[#D4A853] hover:shadow-[0_5px_14px_rgba(212,168,83,0.16)] active:translate-y-0 active:scale-95 focus-visible:ring-2 focus-visible:ring-[#D4A853]/40 motion-reduce:transform-none motion-reduce:!transition-none" aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} onClick={onThemeToggle}>
+        <button type="button" className="topbar-action !transition-all !duration-300 !ease-out hover:-translate-y-0.5 hover:border-[#F5B800] hover:shadow-[0_5px_14px_rgba(212,168,83,0.16)] active:translate-y-0 active:scale-95 focus-visible:ring-2 focus-visible:ring-[#F5B800]/40 motion-reduce:transform-none motion-reduce:!transition-none" aria-label="Add instrument" aria-haspopup="dialog" onClick={() => setIsInstrumentModalOpen(true)}>+</button>
+        <button type="button" className="topbar-action theme-toggle !transition-all !duration-300 !ease-out hover:-translate-y-0.5 hover:border-[#F5B800] hover:shadow-[0_5px_14px_rgba(212,168,83,0.16)] active:translate-y-0 active:scale-95 focus-visible:ring-2 focus-visible:ring-[#F5B800]/40 motion-reduce:transform-none motion-reduce:!transition-none" aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} onClick={onThemeToggle}>
           {theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
         </button>
       </div>

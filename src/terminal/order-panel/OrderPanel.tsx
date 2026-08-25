@@ -26,7 +26,7 @@ export default function OrderPanel({ theme }: { theme: Theme }) {
             mb: 2,
             borderBottom: "1px solid rgba(212,168,83,.25)",
             "& .MuiTabs-list": { gap: "22px" },
-            "& .MuiTabs-indicator": { height: 2, backgroundColor: "#D4A853" },
+            "& .MuiTabs-indicator": { height: 2, backgroundColor: "#F5B800" },
             "& .MuiTab-root": {
               minWidth: 0,
               minHeight: 42,
@@ -37,7 +37,7 @@ export default function OrderPanel({ theme }: { theme: Theme }) {
               fontWeight: 500,
               textTransform: "none",
             },
-            "& .MuiTab-root.Mui-selected": { color: "#D4A853", fontWeight: 700 },
+            "& .MuiTab-root.Mui-selected": { color: "#F5B800", fontWeight: 700 },
           }}
         >
           <Tab value="market" label="Market" disableRipple />
@@ -109,7 +109,7 @@ export default function OrderPanel({ theme }: { theme: Theme }) {
               fontSize: "0.875rem",
               "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(212,168,83,0.25)" },
               "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(212,168,83,0.4)" },
-              "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#D4A853" },
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#F5B800" },
               "& .MuiSelect-select": { py: 1.25, px: 1.5 },
               "& .MuiSvgIcon-root": { color: "#8a8d96" },
             }}
@@ -208,7 +208,7 @@ export default function OrderPanel({ theme }: { theme: Theme }) {
         </div>
 
         {/* <!-- Buy BTC button --> */}
-        <button className="w-full bg-[#D4A853] hover:bg-[#F0C870] text-[#1a1505] font-bold text-sm rounded-lg py-3 mb-4 transition-colors">
+        <button className="w-full bg-[#F5B800] hover:bg-[#F0C870] text-[#1a1505] font-bold text-sm rounded-lg py-3 mb-4 transition-colors">
           {orderType === "market" ? "Buy BTC" : `Place ${orderType === "limit" ? "Limit" : "Stop"} Buy`}
         </button>
 

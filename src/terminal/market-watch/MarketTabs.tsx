@@ -26,7 +26,7 @@ export default function MarketTabs({ value, onChange }: MarketTabsProps) {
       sx={{
         minHeight: 34,
         "& .MuiTabs-list": { gap: "18px" },
-        "& .MuiTabs-indicator": { height: 2, backgroundColor: "#D4A853" },
+        "& .MuiTabs-indicator": { height: 2, backgroundColor: "#F5B800" },
         "& .MuiTab-root": {
           minWidth: 0,
           minHeight: 34,
@@ -37,7 +37,7 @@ export default function MarketTabs({ value, onChange }: MarketTabsProps) {
           fontWeight: 500,
           textTransform: "none",
         },
-        "& .MuiTab-root.Mui-selected": { color: "#D4A853", fontWeight: 700 },
+        "& .MuiTab-root.Mui-selected": { color: "#F5B800", fontWeight: 700 },
       }}
     >
       {MARKET_TABS.map((tab) => <Tab key={tab.value} value={tab.value} label={tab.label} disableRipple />)}

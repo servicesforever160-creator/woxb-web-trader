@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Paxivo WebTrader",
-  description: "Paxivo trading terminal",
+  title: `${process.env.NEXT_PUBLIC_APP_NAME} WebTrader`,
+  description: `${process.env.NEXT_PUBLIC_APP_NAME} trading terminal`,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

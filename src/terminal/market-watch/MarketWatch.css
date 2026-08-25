@@ -1,20 +1,27 @@
 .market-watch-panel {
   height: 100%;
+  min-height: 0;
+
   display: flex;
   flex-direction: column;
+
   background: var(--terminal-card);
   color: var(--terminal-text);
-  font-family: Inter, sans-serif;
+
+  font-family: Inter, Arial, sans-serif;
 }
 
-/* Header */
 
 .market-watch-header {
   height: 46px;
+  flex: 0 0 46px;
+
   padding: 0 14px;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   border-bottom: 1px solid var(--terminal-border);
 }
 
@@ -26,63 +33,136 @@
 
 .market-watch-actions {
   display: flex;
+  align-items: center;
   gap: 12px;
 }
 
 .market-watch-actions button {
+  display: grid;
+  place-items: center;
+
+  width: 28px;
+  height: 28px;
+  padding: 0;
+
   background: transparent;
-  border: none;
-  color: var(--terminal-text);
+  border: 1px solid transparent;
+  border-radius: 7px;
+
+  color: var(--terminal-muted-text);
+
   font-size: 20px;
   cursor: pointer;
+
+  transition:
+    color 140ms ease,
+    background 140ms ease,
+    border-color 140ms ease;
 }
 
-/* Search */
+.market-watch-actions button:hover {
+  color: var(--terminal-primary);
+  background: color-mix(
+    in srgb,
+    var(--terminal-primary) 8%,
+    transparent
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--terminal-primary) 18%,
+    transparent
+  );
+}
+
 
 .search-wrapper {
   padding: 12px;
 }
 
 .search-box {
+  box-sizing: border-box;
+
   width: 100%;
   height: 38px;
+
+  padding: 0 14px;
+
   background: var(--terminal-muted);
+
   border: 1px solid var(--terminal-border);
   border-radius: 8px;
-  padding: 0 14px;
+
   color: var(--terminal-text);
+
   font-size: 14px;
   outline: none;
+
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    background 140ms ease;
+}
+
+.search-box:focus {
+  border-color: var(--terminal-primary);
+
+  box-shadow:
+    0 0 0 3px color-mix(
+      in srgb,
+      var(--terminal-primary) 12%,
+      transparent
+    );
 }
 
 .search-box::placeholder {
   color: var(--terminal-muted-text);
 }
 
-/* Tabs */
 
 .market-tabs {
   padding: 0 12px 10px;
+
   border-bottom: 1px solid var(--terminal-border);
 }
 
-.market-tabs-control .MuiTab-root:hover { color: var(--terminal-text); }
-
-.market-empty-state {
-  margin: 0;
-  padding: 30px 12px;
+.market-tabs-control .MuiTab-root {
   color: var(--terminal-muted-text);
-  font-size: 13px;
-  text-align: center;
+
+  transition:
+    color 140ms ease,
+    background 140ms ease;
+}
+
+.market-tabs-control .MuiTab-root:hover {
+  color: var(--terminal-text);
+}
+
+.market-tabs-control .MuiTab-root.Mui-selected {
+  color: var(--terminal-primary);
+}
+
+.market-tabs-control .MuiTabs-indicator {
+  background-color: var(--terminal-primary);
 }
 
 .market-tab {
   background: none;
   border: none;
+
   color: var(--terminal-muted-text);
+
   font-size: 13px;
   font-weight: 500;
+
   cursor: pointer;
+
+  transition:
+    color 140ms ease,
+    background 140ms ease;
+}
+
+.market-tab:hover {
+  color: var(--terminal-text);
 }
 
 .market-tab.active {
@@ -90,15 +170,32 @@
   font-weight: 700;
 }
 
-/* Symbol List */
+
+
+.market-empty-state {
+  margin: 0;
+  padding: 30px 12px;
+
+  color: var(--terminal-muted-text);
+
+  font-size: 13px;
+  text-align: center;
+}
+
 
 .symbol-list {
   flex: 1;
   min-width: 0;
+  min-height: 0;
+
   overflow: auto;
+
   scrollbar-gutter: stable;
   scrollbar-width: thin;
-  scrollbar-color: var(--terminal-muted-text) var(--terminal-muted);
+
+  scrollbar-color:
+    var(--terminal-muted-text)
+    var(--terminal-muted);
 }
 
 .symbol-list::-webkit-scrollbar {
@@ -113,8 +210,10 @@
 .symbol-list::-webkit-scrollbar-thumb {
   min-width: 44px;
   min-height: 44px;
+
   border: 3px solid var(--terminal-muted);
   border-radius: 999px;
+
   background: var(--terminal-muted-text);
 }
 
@@ -126,106 +225,6 @@
   background: var(--terminal-muted);
 }
 
-/* Row */
-
-.symbol-row {
-  height: 62px;
-  padding: 0 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--terminal-border);
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.symbol-row:hover {
-  background: rgba(255,255,255,0.03);
-}
-
-/* Left */
-
-.symbol-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.symbol-avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: var(--terminal-background);
-  border: 1px solid var(--terminal-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--terminal-text);
-}
-
-.symbol-info h4 {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--terminal-text);
-}
-
-.symbol-info span {
-  font-size: 11px;
-  color: var(--terminal-muted-text);
-}
-
-/* Right */
-
-.symbol-price {
-  text-align: right;
-}
-
-.symbol-price h4 {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.symbol-price span {
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.symbol-price.up h4,
-.symbol-price.up span {
-  color: #2dd4bf;
-}
-
-.symbol-price.down h4,
-.symbol-price.down span {
-  color: #ff3b3b;
-}
-
-/* Footer Button */
-
-.market-watch-footer {
-  padding: 12px;
-}
-
-.view-all-btn {
-  width: 100%;
-  height: 40px;
-  border-radius: 10px;
-  border: 1px solid var(--terminal-border);
-  background: transparent;
-  color: var(--terminal-primary);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.view-all-btn:hover {
-  background: rgba(212,168,83,0.08);
-}
 
 .symbol-row {
   height: 62px;
@@ -238,43 +237,70 @@
   border-bottom: 1px solid var(--terminal-border);
 
   cursor: pointer;
-  transition: background 0.15s ease;
+
+  transition:
+    background 140ms ease,
+    border-color 140ms ease;
 }
 
 .symbol-row:hover {
-  background: rgba(255,255,255,0.03);
+  background: color-mix(
+    in srgb,
+    var(--terminal-primary) 4%,
+    transparent
+  );
 }
 
-/* Left Side */
 
 .symbol-left {
   display: flex;
   align-items: center;
   gap: 10px;
+
+  min-width: 0;
 }
 
 .symbol-avatar {
   width: 30px;
   height: 30px;
-
-  border-radius: 50%;
-
-  background: var(--terminal-background);
-  border: 1px solid var(--terminal-border);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  color: var(--terminal-text);
-  font-size: 11px;
-  font-weight: 700;
 
   flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: var(--terminal-background);
+
+  border: 1px solid var(--terminal-border);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--terminal-text);
+
+  font-size: 11px;
+  font-weight: 700;
+
+  transition:
+    border-color 140ms ease,
+    background 140ms ease;
+}
+
+.symbol-row:hover .symbol-avatar {
+  border-color: color-mix(
+    in srgb,
+    var(--terminal-primary) 35%,
+    var(--terminal-border)
+  );
+}
+
+.symbol-info {
+  min-width: 0;
 }
 
 .symbol-info h4 {
   margin: 0;
+
   color: var(--terminal-text);
 
   font-size: 14px;
@@ -283,6 +309,7 @@
 
 .symbol-info span {
   display: block;
+
   margin-top: 2px;
 
   color: var(--terminal-muted-text);
@@ -290,26 +317,35 @@
   font-size: 11px;
 }
 
-/* Right Side */
 
 .symbol-price {
+  flex-shrink: 0;
+
   text-align: right;
 }
 
 .symbol-price h4 {
   margin: 0;
 
+  color: var(--terminal-text);
+
   font-size: 14px;
   font-weight: 700;
+
+  font-variant-numeric: tabular-nums;
 }
 
 .symbol-price span {
   display: block;
+
   margin-top: 2px;
 
   font-size: 12px;
   font-weight: 600;
+
+  font-variant-numeric: tabular-nums;
 }
+
 
 .symbol-price.up h4,
 .symbol-price.up span {
@@ -318,5 +354,59 @@
 
 .symbol-price.down h4,
 .symbol-price.down span {
-  color: #ff3b3b;
+  color: #ff4d57;
+}
+
+
+.market-watch-footer {
+  padding: 12px;
+
+  border-top: 1px solid var(--terminal-border);
+}
+
+.view-all-btn {
+  width: 100%;
+  height: 40px;
+
+  border-radius: 10px;
+
+  border: 1px solid var(--terminal-border);
+
+  background: transparent;
+
+  color: var(--terminal-primary);
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    color 140ms ease,
+    background 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.view-all-btn:hover {
+  color: var(--terminal-primary-light);
+
+  background: color-mix(
+    in srgb,
+    var(--terminal-primary) 8%,
+    transparent
+  );
+
+  border-color: var(--terminal-primary);
+
+  box-shadow:
+    0 0 0 1px color-mix(
+      in srgb,
+      var(--terminal-primary) 10%,
+      transparent
+    );
+}
+
+.view-all-btn:active {
+  transform: translateY(1px);
 }

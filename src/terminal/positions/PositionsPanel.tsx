@@ -72,7 +72,7 @@ export default function PositionsPanel() {
         sx={{
           minHeight: 57,
           borderBottom: "1px solid rgba(212, 168, 83, .25)",
-          "& .MuiTabs-indicator": { height: 2, backgroundColor: "#D4A853" },
+          "& .MuiTabs-indicator": { height: 2, backgroundColor: "#F5B800" },
           "& .MuiTabs-list": { gap: "30px" },
           "& .MuiTab-root": {
             minHeight: 57,
@@ -84,7 +84,7 @@ export default function PositionsPanel() {
             fontWeight: 500,
             textTransform: "none",
           },
-          "& .MuiTab-root.Mui-selected": { color: "#D4A853", fontWeight: 700 },
+          "& .MuiTab-root.Mui-selected": { color: "#F5B800", fontWeight: 700 },
         }}
       >
         {POSITION_TABS.map((tab) => (
