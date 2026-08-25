@@ -1,0 +1,51 @@
+features/
+└── terminal/
+    │
+    ├── layout/
+    │   ├── TerminalLayout.jsx
+    │   └── TerminalGrid.jsx
+    │
+    ├── market-watch/
+    │   ├── MarketWatch.jsx
+    │   ├── SymbolRow.jsx
+    │   ├── SearchBox.jsx
+    │   └── MarketTabs.jsx
+    │
+    ├── chart/
+    │   ├── ChartArea.jsx
+    │   ├── ChartHeader.jsx
+    │   ├── ChartToolbar.jsx
+    │   └── TradingChart.jsx
+    │
+    ├── order-panel/
+    │   ├── OrderPanel.jsx
+    │   ├── BuySellPanel.jsx
+    │   ├── TPInput.jsx
+    │   └── SLInput.jsx
+    │
+    ├── positions/
+    │   ├── PositionsPanel.jsx
+    │   └── PositionRow.jsx
+    │
+    ├── sidebar/
+    │   └── Sidebar.jsx
+    │
+    ├── topbar/
+    │   └── TopBar.jsx
+    │
+    ├── hooks/
+    │   ├── useHorizontalResize.js
+    │   └── useVerticalResize.js
+    │
+    ├── settings-bar/
+    │   └── SettingsBar.jsx
+    │
+    ├── tools-bar/
+    │   └── ToolsBar.jsx
+    │
+    ├── bottom-bar/
+    │   └── BottomBar.jsx
+    │
+    ├── terminal.css
+    │
+    └── TerminalApp.jsx

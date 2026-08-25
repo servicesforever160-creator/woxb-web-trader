@@ -1,0 +1,21 @@
+.positions-panel { width: 100%; height: 100%; overflow: hidden; color: var(--terminal-text); background: var(--terminal-card); font: 500 13px Inter, Arial, sans-serif; }
+.positions-tabs { min-height: 57px; padding: 0 24px; }
+.positions-tabs .MuiTabs-list,
+.positions-tabs .MuiTabs-flexContainer { gap: 30px; }
+.positions-tabs .MuiTab-root:hover { color: var(--terminal-text); }
+.positions-table-wrap { height: calc(100% - 57px); overflow: auto; }
+.positions-table { width: 100%; min-width: 900px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.positions-table th, .positions-table td { padding: 15px 10px; border-bottom: 1px solid var(--terminal-border); white-space: nowrap; text-align: left; }
+.positions-table th { color: var(--terminal-muted-text); font-size: 12px; font-weight: 500; }
+.positions-table th:first-child, .positions-table td:first-child { padding-left: 24px; }
+.positions-table th:last-child, .positions-table td:last-child { padding-right: 24px; }
+.positions-table td { color: var(--terminal-text); }
+.positions-table tbody tr:hover:not(.positions-total) { background: rgba(212, 168, 83, .04); }
+.cell-positive { color: #00c076 !important; }
+.cell-negative { color: #ff4d57 !important; }
+.cell-strong { font-weight: 700; }
+.cell-status { color: var(--terminal-muted-text) !important; }
+.positions-total td { padding-block: 19px; border-bottom: 0; font-size: 14px; font-weight: 700; }
+.table-action { min-width: 56px; height: 27px; border: 1px solid #4a3035; border-radius: 5px; color: #ff7a81; background: rgba(255, 77, 87, .08); cursor: pointer; font: 600 11px Inter, Arial, sans-serif; }
+.table-action:hover { color: var(--terminal-text); background: #d43c46; }
+.positions-empty { padding: 38px !important; color: var(--terminal-muted-text) !important; text-align: center !important; }

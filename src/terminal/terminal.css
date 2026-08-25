@@ -1,0 +1,294 @@
+.terminal {
+  --terminal-background: #0A0A0F;
+  --terminal-card: #111118;
+  --terminal-muted: #1A1A24;
+  --terminal-primary: #D4A853;
+  --terminal-primary-light: #F0C870;
+  --terminal-brand: #D4A853;
+  --terminal-brand-light: #F0C870;
+  --terminal-border: rgba(212, 168, 83, 0.25);
+  --terminal-border-hover: #8A6830;
+  --terminal-resizer: #303039;
+  --terminal-resizer-grip: #A5A5B0;
+  --terminal-text: #F5F5F7;
+  --terminal-muted-text: #8888A0;
+  height: 100vh;
+  display: grid;
+
+  grid-template-columns:
+    53px      /* Settings */
+    1fr       /* Resizable market + chart */
+    320px;    /* Order */
+
+  grid-template-rows:
+    70px      /* Top */
+    1fr       /* Main */
+    180px     /* Positions */
+    50px;     /* Bottom */
+  background-color:var(--terminal-background) !important;
+}
+
+.terminal.light {
+  --terminal-background: #E8E8EE;
+  --terminal-card: #EFEFF4;
+  --terminal-muted: #E2E2E8;
+  --terminal-text: #202028;
+  --terminal-muted-text: #6F7080;
+  --terminal-primary: #16161D;
+  --terminal-primary-light: #2B2B33;
+  --terminal-border: rgba(22, 22, 29, 0.16);
+  --terminal-border-hover: #16161D;
+  --terminal-resizer: #B9BBC5;
+  --terminal-resizer-grip: #4E505B;
+}
+
+.terminal.light [class*="text-white"] {
+  color: var(--terminal-text) !important;
+}
+
+.terminal.light .order-bar-panel .relative > button {
+  color: rgb(255, 255, 255) !important;
+}
+
+.terminal.light .MuiSelect-select {
+  color: var(--terminal-text) !important;
+}
+
+.terminal.light .order-unit-select .MuiOutlinedInput-root {
+  background-color: var(--terminal-muted) !important;
+}
+
+.terminal.light .order-unit-select .MuiOutlinedInput-notchedOutline {
+  border-color: var(--terminal-border) !important;
+}
+
+.terminal.light .order-unit-select .Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--terminal-primary) !important;
+}
+
+.terminal.light .field-box input::placeholder {
+  color: var(--terminal-muted-text) !important;
+}
+
+.terminal.light .MuiTabs-indicator {
+  background-color: var(--terminal-primary) !important;
+}
+
+.terminal.light .MuiTab-root.Mui-selected {
+  color: var(--terminal-primary) !important;
+}
+
+.terminal.light .order-bar-panel > button {
+  color: rgb(255, 255, 255) !important;
+  background-color: var(--terminal-primary) !important;
+}
+
+.terminal.light .order-bar-panel > button:hover {
+  background-color: var(--terminal-primary-light) !important;
+}
+
+.terminal .topbar{
+  grid-column:1/-1;
+  grid-row:1;
+}
+.terminal .settings-bar{
+  grid-column:1;
+  grid-row:2/5;
+}
+
+.terminal .order-panel{
+  grid-column:3;
+  grid-row:2/4;
+}
+.terminal .bottom-bar{
+  grid-column:2/4;
+  grid-row:4;
+}
+.terminal .topbar {
+  border-bottom: 5px solid var(--terminal-background) !important;
+  height: auto !important;
+}
+
+.terminal .settings-bar {
+  border-right: 5px solid var(--terminal-background);
+}
+
+.terminal .market-watch {
+  border-right: 0;
+}
+
+.terminal .order-panel {
+  border-left: 5px solid var(--terminal-background);
+}
+
+.terminal .bottom-bar {
+  border-top: 5px solid var(--terminal-background);
+}
+.terminal .market-chart-wrapper {
+  grid-column: 2;
+  grid-row: 2 / 4;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.terminal .market-chart-panels,
+.terminal .chart-panels {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.terminal .market-watch,
+.terminal .chart-area {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.terminal .terminal-tab-placeholder {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: var(--terminal-text);
+  background: var(--terminal-card);
+  font: 600 16px Inter, Arial, sans-serif;
+}
+
+.terminal .chart-wrapper,
+.terminal .chart-panel-content,
+.terminal .positions-panel-content {
+  height: 100%;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.terminal .positions-panel-content {
+  overflow: auto;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--terminal-muted-text) var(--terminal-muted);
+}
+
+.terminal .positions-panel-content::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.terminal .positions-panel-content::-webkit-scrollbar-track {
+  background: var(--terminal-muted);
+  border-left: 1px solid var(--terminal-border);
+}
+
+.terminal .positions-panel-content::-webkit-scrollbar-thumb {
+  min-height: 44px;
+  border: 3px solid var(--terminal-muted);
+  border-radius: 999px;
+  background: var(--terminal-muted-text);
+}
+
+.terminal .positions-panel-content::-webkit-scrollbar-thumb:hover {
+  background: var(--terminal-border-hover);
+}
+
+.terminal .positions-panel-content::-webkit-scrollbar-corner {
+  background: var(--terminal-muted);
+}
+.terminal .resize-line {
+  position: relative;
+  flex: 0 0 5px;
+  height: 5px;
+  background: var(--terminal-resizer);
+  cursor: row-resize;
+}
+
+.terminal .vertical-resize-line {
+  position: relative;
+  flex: 0 0 5px;
+  width: 5px;
+  min-width: 5px;
+  background: var(--terminal-resizer);
+  cursor: col-resize;
+}
+
+.terminal .resize-line:hover,
+.terminal .vertical-resize-line:hover,
+.terminal .resize-line:focus-visible,
+.terminal .vertical-resize-line:focus-visible,
+.terminal .resize-line[data-resize-handle-state="drag"],
+.terminal .vertical-resize-line[data-resize-handle-state="drag"] {
+  background: var(--terminal-border-hover);
+  outline: none;
+}
+
+.terminal .resize-line::after,
+.terminal .vertical-resize-line::after {
+  content: "";
+  position: absolute;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.terminal .resize-line::after {
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 4px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, var(--terminal-resizer-grip) 1px, transparent 1.5px) 0 0 / 8px 4px repeat-x;
+}
+
+.terminal .vertical-resize-line::after {
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 24px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, var(--terminal-resizer-grip) 1px, transparent 1.5px) 0 0 / 4px 8px repeat-y;
+}
+
+.terminal.light .resize-line::after,
+.terminal.light .vertical-resize-line::after {
+  opacity: .65;
+}
+
+.terminal .resize-line:hover::after,
+.terminal .vertical-resize-line:hover::after,
+.terminal .resize-line:focus-visible::after,
+.terminal .vertical-resize-line:focus-visible::after,
+.terminal .resize-line[data-resize-handle-state="drag"]::after,
+.terminal .vertical-resize-line[data-resize-handle-state="drag"]::after {
+  opacity: 1;
+}
+.terminal .positions-panel-content,
+.terminal .chart-panel-content,
+.terminal .market-watch-panel {
+
+  border-radius: 5px;
+  background-color: var(--terminal-card);
+}
+.terminal .bottom-bar-panel {
+  border-top-left-radius: 5px;
+  background-color: var(--terminal-card);
+  color: var(--terminal-text);
+}
+.terminal .order-bar-panel {
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  background-color: var(--terminal-card);
+}
+.terminal .settings-bar-panel {
+  border-top-right-radius: 5px;
+  background-color: var(--terminal-card);
+}
+.terminal .settings-bar-panel,
+.terminal .bottom-bar-panel,
+.terminal .order-bar-panel {
+  width: 100%;
+  height: 100%;
+}

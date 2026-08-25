@@ -1,0 +1,39 @@
+.settings-bar-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 48px;
+  height: 100%;
+  padding-top: 8px;
+}
+
+.settings-nav-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--terminal-muted-text);
+  cursor: pointer;
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.settings-nav-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.9;
+}
+
+.settings-nav-icon:hover,
+.settings-nav-icon:focus-visible,
+.settings-nav-icon.active {
+  color: var(--terminal-text);
+  background: var(--terminal-muted);
+}
+
+.settings-nav-icon:focus-visible {
+  outline: 1px solid var(--terminal-primary);
+  outline-offset: -1px;
+}
