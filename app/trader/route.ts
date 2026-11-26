@@ -331,7 +331,7 @@ export async function GET(request: NextRequest) {
     return exchangeError("The WebTrader API returned an invalid session.", 502);
   }
 
-  const response = NextResponse.redirect(new URL("/", request.url), { status: 303, headers });
+  const response = NextResponse.redirect(new URL("/", origin), { status: 303, headers });
   const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
