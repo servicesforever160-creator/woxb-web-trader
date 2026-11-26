@@ -156,3 +156,21 @@
   height: 100%;
   overflow: hidden;
 }
+
+.chart-plot {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.chart-status {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  color: var(--terminal-muted-text);
+  font-size: 13px;
+  text-align: center;
+  pointer-events: none;
+}

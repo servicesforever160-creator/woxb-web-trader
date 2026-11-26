@@ -1,0 +1,101 @@
+.topbar-account {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: center;
+  min-width: 0;
+  max-width: 62%;
+  min-height: 50px;
+  margin-left: 10px;
+  overflow-x: auto;
+
+  border: 1px solid var(--terminal-border);
+  border-radius: 11px;
+  background: var(--terminal-muted);
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--terminal-border-hover) transparent;
+}
+
+.topbar-account:focus-visible {
+  outline: 2px solid var(--terminal-primary);
+  outline-offset: 2px;
+}
+
+.account-card-identity {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 11px 6px 8px;
+}
+
+.account-card-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+
+  border: 1px solid color-mix(in srgb, var(--terminal-primary) 42%, transparent);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--terminal-primary) 18%, var(--terminal-card));
+  color: var(--terminal-text);
+}
+
+.account-card-profile {
+  display: grid;
+  gap: 3px;
+}
+
+.account-card-name {
+  max-width: 160px;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--terminal-muted-text);
+  font-size: 10px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.account-card-mode {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--terminal-primary) 15%, var(--terminal-card));
+  color: var(--terminal-text);
+  font-weight: 650;
+}
+
+.account-card-metrics {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  padding: 3px 11px;
+  border-left: 1px solid var(--terminal-border);
+  white-space: nowrap;
+}
+
+.account-card-metric dt {
+  color: var(--terminal-muted-text);
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.account-card-metric dd {
+  margin: 3px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+}

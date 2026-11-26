@@ -265,6 +265,10 @@
 
 
 
+.top-bar-panel:has(.topbar-account) .paxivo-logo {
+  margin-right: 12px;
+}
+
 .topbar-actions {
   display: flex;
   flex: 0 0 auto;

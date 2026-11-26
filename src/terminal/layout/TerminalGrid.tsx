@@ -4,6 +4,7 @@ import "../terminal.css";
 import { Group, Panel, Separator } from "react-resizable-panels";
 
 import TopBar from "../topbar/TopBar";
+import type { AccountDetail } from "../topbar/accountDetails";
 import MarketWatch from "../market-watch/MarketWatch";
 import ChartArea from "../chart/ChartArea";
 import OrderPanel from "../order-panel/OrderPanel";
@@ -12,6 +13,7 @@ import SettingsBar from "../settings-bar/SettingsBar";
 import type { TerminalTab } from "../settings-bar/SettingsBar";
 import BottomBar from "../bottom-bar/BottomBar";
 import { useTheme } from "../hooks/useTheme";
+import { useTopbarInstruments } from "../topbar/useTopbarInstruments";
 
 const TAB_LABELS: Partial<Record<TerminalTab, string>> = {
   calendar: "Calendar",
@@ -19,14 +21,24 @@ const TAB_LABELS: Partial<Record<TerminalTab, string>> = {
   settings: "Settings",
 };
 
-export default function TerminalGrid() {
+export default function TerminalGrid({
+  accountDetails,
+}: {
+  accountDetails: AccountDetail[];
+}) {
   const [activeTab, setActiveTab] = useState<TerminalTab>("market-watch");
   const { theme, toggleTheme } = useTheme();
+  const topbarInstruments = useTopbarInstruments();
 
   return (
     <div className={`terminal ${theme}`}>
       <div className="topbar">
-        <TopBar theme={theme} onThemeToggle={toggleTheme} />
+        <TopBar
+          accountDetails={accountDetails}
+          {...topbarInstruments}
+          theme={theme}
+          onThemeToggle={toggleTheme}
+        />
       </div>
       <div className="settings-bar">
         <SettingsBar activeTab={activeTab} onTabChange={setActiveTab} />
@@ -56,7 +68,11 @@ export default function TerminalGrid() {
               <Group orientation="vertical" className="chart-panels">
                 <Panel defaultSize={75} minSize={40}>
                   <div className="chart-panel-content">
-                    <ChartArea theme={theme} />
+                    <ChartArea
+                      key={topbarInstruments.activeSymbol}
+                      symbol={topbarInstruments.activeSymbol}
+                      theme={theme}
+                    />
                   </div>
                 </Panel>
 
