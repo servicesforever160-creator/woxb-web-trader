@@ -12,6 +12,7 @@ import PositionsPanel from "../positions/PositionsPanel";
 import SettingsBar from "../settings-bar/SettingsBar";
 import type { TerminalTab } from "../settings-bar/SettingsBar";
 import BottomBar from "../bottom-bar/BottomBar";
+import { useTradeActions } from "../hooks/useTradeActions";
 import { useTheme } from "../hooks/useTheme";
 import { useTopbarInstruments } from "../topbar/useTopbarInstruments";
 
@@ -22,13 +23,16 @@ const TAB_LABELS: Partial<Record<TerminalTab, string>> = {
 };
 
 export default function TerminalGrid({
+  accountId,
   accountDetails,
 }: {
+  accountId?: string;
   accountDetails: AccountDetail[];
 }) {
   const [activeTab, setActiveTab] = useState<TerminalTab>("market-watch");
   const { theme, toggleTheme } = useTheme();
   const topbarInstruments = useTopbarInstruments();
+  const trades = useTradeActions();
 
   return (
     <div className={`terminal ${theme}`}>
@@ -80,7 +84,13 @@ export default function TerminalGrid({
 
                 <Panel defaultSize={25} minSize={10}>
                   <div className="positions-panel-content">
-                    <PositionsPanel />
+                    <PositionsPanel
+                      key={accountId}
+                      accountId={accountId}
+                      revision={trades.revision}
+                      busy={trades.busy}
+                      onClose={trades.close}
+                    />
                   </div>
                 </Panel>
               </Group>
@@ -89,7 +99,13 @@ export default function TerminalGrid({
         </Group>
       </div>
       <div className="order-panel">
-        <OrderPanel theme={theme} />
+        <OrderPanel
+          key={accountId}
+          accountId={accountId}
+          symbol={topbarInstruments.activeSymbol}
+          busy={trades.busy}
+          onOpen={trades.open}
+        />
       </div>
 
       <div className="bottom-bar">

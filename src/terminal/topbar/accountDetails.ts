@@ -1,4 +1,5 @@
 type TraderAccount = {
+  id?: string;
   nickname?: string;
   account_number?: string;
   balance?: string;
@@ -28,17 +29,21 @@ function formatAmount(amount: unknown, currency: string) {
   return `${whole}.${decimals}${currency ? ` ${currency}` : ""}`;
 }
 
-export function readAccountDetails(cookie?: string): AccountDetail[] {
-  if (!cookie) return [];
+export function readTraderAccount(cookie?: string): TraderAccount | null {
+  if (!cookie) return null;
 
-  let account: TraderAccount | null;
   try {
-    account = JSON.parse(cookie);
+    const account = JSON.parse(cookie);
+    return account && typeof account === "object" && !Array.isArray(account)
+      ? account
+      : null;
   } catch {
-    return [];
+    return null;
   }
+}
 
-  if (!account || typeof account !== "object") return [];
+export function readAccountDetails(account: TraderAccount | null): AccountDetail[] {
+  if (!account) return [];
 
   const currency = account.currency?.code;
   const currencyCode = typeof currency === "string" ? currency : "";

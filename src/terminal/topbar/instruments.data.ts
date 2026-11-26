@@ -9,7 +9,7 @@ export type Instrument = {
 
 // Static development data. The object shape is the same one expected from a market API.
 export const INSTRUMENTS: Instrument[] = [
-  { symbol: "BTC/USDT", name: "Bitcoin / Tether", price: "63,152.45", change: "0.42%", trend: "down", icon: "coin" },
+  { symbol: "BTC/USD", name: "Bitcoin / Tether", price: "63,152.45", change: "0.42%", trend: "down", icon: "coin" },
   { symbol: "XAU/USD", name: "Gold / US Dollar", price: "2,387.65", change: "0.62%", trend: "up", icon: "gold" },
   { symbol: "EUR/USD", name: "Euro / US Dollar", price: "1.08562", change: "0.08%", trend: "down", icon: "eu" },
   { symbol: "GBP/USD", name: "British Pound / US Dollar", price: "1.27043", change: "0.15%", trend: "up", icon: "gb" },
@@ -23,4 +23,4 @@ export const INSTRUMENTS: Instrument[] = [
   { symbol: "GBP/JPY", name: "British Pound / Japanese Yen", price: "199.731", change: "0.31%", trend: "up", icon: "gb" },
 ];
 
-export const DEFAULT_TOPBAR_SYMBOLS = ["BTC/USDT", "XAU/USD", "EUR/USD", "GBP/USD"];
+export const DEFAULT_TOPBAR_SYMBOLS = ["BTC/USD", "XAU/USD", "EUR/USD", "GBP/USD"];

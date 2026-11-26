@@ -1,232 +1,132 @@
-import "./OrderPanel.css"
+import "./OrderPanel.css";
 import { useState } from "react";
-import { FormControl, MenuItem, Select, Tab, Tabs } from "@mui/material";
-import type { Theme } from "../hooks/useTheme";
+import type { FormEvent } from "react";
+import type { OpenTradeRequest } from "@/src/services/api/trade/trade.types";
 
-export default function OrderPanel({ theme }: { theme: Theme }) {
-  const [volumeUnit, setVolumeUnit] = useState("Lots");
-  const [orderType, setOrderType] = useState("market");
-  const [entryPrice, setEntryPrice] = useState("");
-  const [takeProfit, setTakeProfit] = useState("");
-  const [stopLoss, setStopLoss] = useState("");
-  const surfaceColor = theme === "dark" ? "#1A1A24" : "#E2E2E8";
-  const textColor = theme === "dark" ? "#FFFFFF" : "#202028";
+type OrderPanelProps = {
+  accountId?: string;
+  symbol: string;
+  busy: boolean;
+  onOpen: (payload: OpenTradeRequest) => Promise<{ success: boolean; message: string }>;
+};
+
+function readOptionalPrice(values: FormData, name: string) {
+  const value = values.get(name);
+  return typeof value === "string" && value !== "" ? Number(value) : undefined;
+}
+
+export default function OrderPanel({ accountId, symbol, busy, onOpen }: OrderPanelProps) {
+  const [feedback, setFeedback] = useState<{ success: boolean; message: string }>();
+  const [base, quote] = symbol.split("/");
+
+  async function submitTrade(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!accountId || busy) return;
+
+    const submitter = (event.nativeEvent as SubmitEvent).submitter;
+    if (!(submitter instanceof HTMLButtonElement)) return;
+
+    const side = submitter.value;
+    if (side !== "Buy" && side !== "Sell") return;
+
+    const values = new FormData(event.currentTarget);
+    const lots = Number(values.get("lots"));
+    const stopLoss = readOptionalPrice(values, "stop_loss");
+    const takeProfit = readOptionalPrice(values, "take_profit");
+
+    if (!Number.isFinite(lots) || lots <= 0 || [stopLoss, takeProfit].some(
+      (price) => price !== undefined && (!Number.isFinite(price) || price <= 0),
+    )) {
+      setFeedback({ success: false, message: "Enter positive values for lots and any exit prices." });
+      return;
+    }
+
+    setFeedback(undefined);
+    setFeedback(await onOpen({
+      account_id: accountId,
+      symbol,
+      type: side,
+      lots,
+      stop_loss: stopLoss,
+      take_profit: takeProfit,
+    }));
+  }
 
   return (
     <div className="order-bar-panel order-panel-scroll p-4">
-        <Tabs
-          value={orderType}
-          onChange={(_, nextOrderType) => setOrderType(nextOrderType)}
-          aria-label="Order type"
-          className="order-type-tabs"
-          variant="scrollable"
-          scrollButtons={false}
-          sx={{
-            minHeight: 42,
-            mb: 2,
-            borderBottom: "1px solid rgba(212,168,83,.25)",
-            "& .MuiTabs-list": { gap: "22px" },
-            "& .MuiTabs-indicator": { height: 2, backgroundColor: "#F5B800" },
-            "& .MuiTab-root": {
-              minWidth: 0,
-              minHeight: 42,
-              padding: 0,
-              color: "#6b6f7b",
-              fontFamily: "Inter, Arial, sans-serif",
-              fontSize: 13,
-              fontWeight: 500,
-              textTransform: "none",
-            },
-            "& .MuiTab-root.Mui-selected": { color: "#F5B800", fontWeight: 700 },
-          }}
-        >
-          <Tab value="market" label="Market" disableRipple />
-          <Tab value="limit" label="Limit" disableRipple />
-          <Tab value="stop" label="Stop" disableRipple />
-        </Tabs>
-
-        {/* <!-- Sell / Buy buttons --> */}
-        <div className="relative flex gap-1.5 mb-4">
-          <button className="flex-1 bg-[#E5404C] hover:bg-[#d63943] rounded-lg py-2.5 px-3 text-left transition-colors">
-            <div className="text-white text-xs font-medium opacity-90">Sell</div>
-            <div className="text-white text-base font-bold tabular leading-tight">
-              64,062.47
-            </div>
-          </button>
-          <button className="flex-1 bg-[#1FAE6A] hover:bg-[#1b9c5f] rounded-lg py-2.5 px-3 text-left transition-colors">
-            <div className="text-white text-xs font-medium opacity-90">BUY</div>
-            <div className="text-white text-base font-bold tabular leading-tight">
-              64,062.47
-            </div>
-          </button>
-          <span className="absolute left-1/2 -top-2 -translate-x-1/2 bg-[#0d0e12] border border-white/10 text-white/70 text-[10px] px-1.5 py-0.5 rounded tabular">
-            35.2
-          </span>
+      <form aria-label="Market trade" onSubmit={submitTrade} className="mb-4">
+        <div className="mb-4 flex items-center justify-between">
+          <span className="text-sm font-semibold">Market</span>
+          <strong className="text-sm">{symbol}</strong>
         </div>
 
-        {/* <!-- Volume --> */}
-        <div className="text-white/50 text-xs mb-1.5">Volume</div>
-        <div className="flex items-stretch stepper-box rounded-lg overflow-hidden mb-3">
-          <button className="px-3 text-white/70 hover:text-white text-lg font-medium">
-            −
-          </button>
-          <div className="flex-1 flex items-center justify-center text-white text-sm font-medium tabular">
-            0.10
-          </div>
-          <button className="px-3 text-white/70 hover:text-white text-lg font-medium">
-            +
-          </button>
-        </div>
-
-        {/* Volume unit — Material UI Select */}
-        <FormControl fullWidth size="small" className="order-unit-select">
-          <Select
-            value={volumeUnit}
-            onChange={(event) => setVolumeUnit(event.target.value)}
-            aria-label="Volume unit"
-            MenuProps={{
-              slotProps: {
-                paper: {
-                sx: {
-                  mt: 0.5,
-                  color: textColor,
-                  backgroundColor: surfaceColor,
-                  border: "1px solid rgba(212,168,83,0.25)",
-                  borderRadius: "8px",
-                  "& .MuiMenuItem-root": { fontSize: "0.875rem" },
-                  "& .MuiMenuItem-root:hover, & .MuiMenuItem-root.Mui-selected": {
-                    backgroundColor: "rgba(244,180,0,0.12)",
-                  },
-                },
-                },
-              },
-            }}
-            sx={{
-              mb: 0.25,
-              color: textColor,
-              backgroundColor: surfaceColor,
-              borderRadius: "8px",
-              fontSize: "0.875rem",
-              "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(212,168,83,0.25)" },
-              "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(212,168,83,0.4)" },
-              "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#F5B800" },
-              "& .MuiSelect-select": { py: 1.25, px: 1.5 },
-              "& .MuiSvgIcon-root": { color: "#8a8d96" },
-            }}
-          >
-            <MenuItem value="Lots">Lots</MenuItem>
-            <MenuItem value="Units">Units</MenuItem>
-            <MenuItem value="Contracts">Contracts</MenuItem>
-          </Select>
-        </FormControl>
-
-        <div className="text-white/40 text-xs mb-4">Available: 2.35 Lots</div>
-
-        {/* <!-- Take Profit --> */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-1.5">
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#8a8d96"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-            >
-              <path d="M5 12h14" />
-            </svg>
-            <span className="text-white text-sm">Take Profit</span>
-          </div>
-          <label className="switch relative inline-block">
-            <input type="checkbox" />
-            <span className="switch-track"></span>
-          </label>
-        </div>
-        <div className="field-box rounded-lg flex items-center justify-between px-3 py-2.5 mb-4">
-          <input
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            value={takeProfit}
-            onChange={(event) => setTakeProfit(event.target.value.replace(/\D/g, ""))}
-            placeholder="Price"
-            aria-label="Take Profit price"
-            className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/40"
-          />
-          <span className="text-white/50 text-xs font-medium">USDT</span>
-        </div>
-
-        {orderType !== "market" && (
-          <div className="field-box rounded-lg flex items-center justify-between px-3 py-2.5 mb-4">
+        <fieldset disabled={busy || !accountId} className="min-w-0 space-y-3">
+          <label className="block text-sm">
+            <span className="mb-1 block">Volume (lots)</span>
             <input
-              type="text"
+              className="field-box w-full rounded-lg px-3 py-2"
+              name="lots"
+              type="number"
               inputMode="decimal"
-              value={entryPrice}
-              onChange={(event) => setEntryPrice(event.target.value.replace(/[^0-9.]/g, ""))}
-              placeholder={`${orderType === "limit" ? "Limit" : "Stop"} price`}
-              aria-label={`${orderType} order price`}
-              className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/40"
+              min="0.00000001"
+              step="any"
+              defaultValue="0.10"
+              required
             />
-            <span className="text-white/50 text-xs font-medium">USDT</span>
-          </div>
-        )}
-
-        {/* <!-- Stop Loss --> */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-1.5">
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#8a8d96"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-            >
-              <path d="M5 12h14" />
-            </svg>
-            <span className="text-white text-sm">Stop Loss</span>
-          </div>
-          <label className="switch relative inline-block">
-            <input type="checkbox" />
-            <span className="switch-track"></span>
           </label>
-        </div>
-        <div className="field-box rounded-lg flex items-center justify-between px-3 py-2.5 mb-4">
-          <input
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            value={stopLoss}
-            onChange={(event) => setStopLoss(event.target.value.replace(/\D/g, ""))}
-            placeholder="Price"
-            aria-label="Stop Loss price"
-            className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/40"
-          />
-          <span className="text-white/50 text-xs font-medium">USDT</span>
-        </div>
 
-        {/* <!-- Buy BTC button --> */}
-        <button className="w-full bg-[#F5B800] hover:bg-[#F0C870] text-[#1a1505] font-bold text-sm rounded-lg py-3 mb-4 transition-colors">
-          {orderType === "market" ? "Buy BTC" : `Place ${orderType === "limit" ? "Limit" : "Stop"} Buy`}
-        </button>
+          <label className="block text-sm">
+            <span className="mb-1 block">Take profit {quote && `(${quote})`}</span>
+            <input
+              className="field-box w-full rounded-lg px-3 py-2"
+              name="take_profit"
+              type="number"
+              inputMode="decimal"
+              min="0.00000001"
+              step="any"
+              placeholder="Optional"
+            />
+          </label>
 
-        {/* <!-- Margin info --> */}
-        <div className="space-y-1.5 mb-5 text-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-white/50">Margin Required</span>
-            <span className="text-white tabular">$640.62</span>
+          <label className="block text-sm">
+            <span className="mb-1 block">Stop loss {quote && `(${quote})`}</span>
+            <input
+              className="field-box w-full rounded-lg px-3 py-2"
+              name="stop_loss"
+              type="number"
+              inputMode="decimal"
+              min="0.00000001"
+              step="any"
+              placeholder="Optional"
+            />
+          </label>
+
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              value="Buy"
+              className="flex-1 rounded-lg bg-[#1FAE6A] px-2 py-2 font-semibold text-white hover:bg-[#1b9c5f] disabled:opacity-50"
+            >
+              Buy {base}
+            </button>
+            <button
+              type="submit"
+              value="Sell"
+              className="flex-1 rounded-lg bg-[#E5404C] px-2 py-2 font-semibold text-white hover:bg-[#d63943] disabled:opacity-50"
+            >
+              Sell {base}
+            </button>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-white/50">Value</span>
-            <span className="text-white tabular">$6,406.21</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-white/50">Margin Level</span>
-            <span className="text-[#1FAE6A] tabular font-medium">1,592.35%</span>
-          </div>
-        </div>
+        </fieldset>
+
+        {!accountId && <p className="mt-2 text-sm">Start an account session to trade.</p>}
+        {busy && <p className="mt-2 text-sm" role="status">Processing trade?</p>}
+        {feedback && (
+          <p className="mt-2 text-sm" role={feedback.success ? "status" : "alert"}>
+            {feedback.message}
+          </p>
+        )}
+      </form>
 
         {/* <!-- Market Sentiment --> */}
         <div className="border-t border-white/5 pt-4 mb-5">

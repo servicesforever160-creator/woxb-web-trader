@@ -6,9 +6,11 @@ import type { AccountDetail } from "./topbar/accountDetails";
 
 export default function TerminalApp({
   accessToken,
+  accountId,
   accountDetails,
 }: {
   accessToken?: string;
+  accountId?: string;
   accountDetails: AccountDetail[];
 }) {
   const [initializedToken, setInitializedToken] = useState<string | null>();
@@ -44,5 +46,5 @@ export default function TerminalApp({
   }
   if (initializedToken !== (accessToken ?? null)) return null;
 
-  return <TerminalLayout accountDetails={accountDetails} />;
+  return <TerminalLayout accountId={accountId} accountDetails={accountDetails} />;
 }

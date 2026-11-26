@@ -16,6 +16,13 @@ const ENDPOINTS = {
   TRADING_CENTER: {
     HISTORY: "clients/trading-center/history"
   },
+  TRADE: {
+    OPEN_MY_ACCOUNT: "/clients/trades/open/my-account",
+    OPEN: "/clients/trades/open",
+    CLOSE: "/clients/trades/close",
+    HISTORY_BY_ACCOUNT: (accountId: string) =>
+      `/clients/trades/history/account/${encodeURIComponent(accountId)}`,
+  },
 } as const;
 
 export default ENDPOINTS;
