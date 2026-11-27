@@ -243,7 +243,8 @@
     border-color 140ms ease;
 }
 
-.symbol-row:hover {
+.symbol-row:hover,
+.symbol-row[data-active="true"] {
   background: color-mix(
     in srgb,
     var(--terminal-primary) 4%,
@@ -298,7 +299,7 @@
   min-width: 0;
 }
 
-.symbol-info h4 {
+.symbol-info strong {
   margin: 0;
 
   color: var(--terminal-text);
@@ -324,7 +325,7 @@
   text-align: right;
 }
 
-.symbol-price h4 {
+.symbol-price strong {
   margin: 0;
 
   color: var(--terminal-text);

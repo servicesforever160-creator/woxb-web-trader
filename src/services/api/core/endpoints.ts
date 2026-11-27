@@ -16,6 +16,10 @@ const ENDPOINTS = {
   TRADING_CENTER: {
     HISTORY: "clients/trading-center/history"
   },
+  SYMBOLS: {
+    MARKETS: "/clients/symbols/markets-symbols",
+    FAVORITES: "/clients/symbols/favorites",
+  },
   TRADE: {
     OPEN_MY_ACCOUNT: "/clients/trades/open/my-account",
     OPEN: "/clients/trades/open",

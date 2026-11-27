@@ -1,0 +1,177 @@
+"use client"
+
+import { Button as ButtonPrimitive } from "@base-ui/react/button"
+import { cva, type VariantProps } from "class-variance-authority"
+import { motion } from "framer-motion";
+import { cn } from "@/src/lib/utils"
+import { Spinner } from "./spinner";
+
+const buttonVariants = cva(
+  "group/button inline-flex h-9 min-h-9 w-auto shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding px-4 text-xs font-medium tracking-normal whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  {
+    variants: {
+      variant: {
+        default:
+          "bg-primary text-black hover:bg-primary/80 cursor-pointer hover:bg-primary-light rounded-lg scale-x-[0.99] scale-y-[0.99] hover:scale-x-[1] hover:scale-y-[0.99] transition-all duration-500 ease-in-out shadow-lg hover:shadow-xl shadow-primary/30 hover:shadow-primary/40",
+
+        success:
+          "border-emerald-500/30 bg-emerald-500/10 text-emerald-500 hover:border-emerald-500/45 hover:bg-emerald-500/15 hover:text-emerald-500 cursor-pointer shadow-sm shadow-emerald-500/10",
+
+        purple:
+          "border-violet-500/30 bg-violet-500/10 text-violet-400 hover:border-violet-500/45 hover:bg-violet-500/15 hover:text-violet-400 cursor-pointer shadow-sm shadow-violet-500/10",
+
+        outline:
+          "border-border bg-card text-foreground/70 hover:border-primary/30 hover:bg-primary/[0.04] hover:text-primary aria-expanded:border-primary/30 aria-expanded:bg-primary/[0.06] aria-expanded:text-primary dark:border-border dark:bg-card dark:text-foreground/75 dark:hover:border-primary/40 dark:hover:bg-primary/[0.06] dark:hover:text-primary cursor-pointer",
+
+        secondary:
+          "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
+
+        ghost:
+          "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
+
+        destructive:
+          "bg-destructive/10 cursor-pointer text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
+
+        destructive_fill:
+          "bg-destructive cursor-pointer text-white hover:bg-destructive/70 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-red-600 dark:hover:bg-red-600/50 dark:focus-visible:ring-destructive/40",
+
+        warning:
+          "bg-orange-500 cursor-pointer text-white hover:bg-orange-400 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
+
+        link:
+          "text-primary underline-offset-4 hover:underline cursor-pointer",
+
+        text:
+          "text-primary cursor-pointer",
+      },
+
+      size: {
+        default:
+          "gap-1.5",
+
+        xs:
+          "h-6 min-h-6 w-auto gap-1 rounded-[min(var(--radius-md),10px)] px-2 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
+
+        sm:
+          "h-7 min-h-7 w-auto gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
+
+        lg:
+          "h-9 min-h-9 w-auto gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
+
+        icon:
+          "size-8 w-auto",
+
+        "icon-xs":
+          "size-6 w-auto rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3",
+
+        "icon-sm":
+          "size-7 w-auto rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
+
+        "icon-lg":
+          "size-9 w-auto",
+      },
+    },
+
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
+function hasFullWidth(className: unknown) {
+  return typeof className === "string" && /\b(?:w-full|flex-1|grow)\b/.test(className);
+}
+
+function Button({
+  className,
+  variant = "default",
+  size = "default",
+  loading = false,
+  disabled = false,
+  loadingText,
+  ...props
+}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants> & {
+  loading?: boolean;
+  loadingText?: string;
+}) {
+  const fullWidth = hasFullWidth(className);
+  const hasShine = variant === "default" || variant === "success" || variant === "purple";
+
+  return (
+
+    hasShine
+      ?
+      <motion.div
+        initial="initial"
+        whileHover={disabled ? undefined : "hover"}
+        whileTap={disabled ? undefined : { scale: 0.99 }}
+        className={cn("inline-flex", fullWidth && "w-full")}
+      >
+        <ButtonPrimitive
+          data-slot="button"
+          disabled={disabled || loading}
+          className={cn(
+            "relative overflow-hidden",
+            buttonVariants({ variant, size, className }),
+            (disabled || loading) &&
+            "cursor-not-allowed pointer-events-none opacity-50"
+          )}
+          {...props}
+        >
+          <div className="relative flex justify-center items-center z-20">
+            {loading ? (
+              <div className="flex w-full justify-center">
+                {loadingText && (
+                  <span className="mr-2">{loadingText}</span>
+                )}
+                <Spinner />
+              </div>
+            ) : (
+              props.children
+            )}
+          </div>
+          <motion.span
+            className="pointer-events-none absolute inset-0 z-10 scale-x-[0.3]"
+            style={{
+              background:
+                "linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)",
+            }}
+            variants={{
+              initial: { x: "-100%" },
+              hover: { x: "100%" },
+            }}
+            transition={{
+              duration: 0.6,
+              ease: "easeInOut",
+            }}
+          />
+        </ButtonPrimitive>
+      </motion.div>
+      : (
+        <ButtonPrimitive
+          data-slot="button"
+          disabled={disabled || loading}
+          className={cn(
+            buttonVariants({ variant, size, className }),
+            disabled && "cursor-not-allowed"
+          )}
+          {...props}
+        >
+          <div>
+            {loading ? (
+              <div className="flex w-full justify-center">
+                {loadingText && (
+                  <span className="mr-2">{loadingText}</span>
+                )}
+                <Spinner />
+              </div>
+            ) : (
+              props.children
+            )}
+          </div>
+        </ButtonPrimitive>
+      ))
+}
+
+export { Button, buttonVariants }

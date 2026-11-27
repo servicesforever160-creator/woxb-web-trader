@@ -1,3 +1,4 @@
+import { Button } from "@/src/components/ui/button";
 import "./TopBar.css";
 import Link from "next/link";
 import { PairSearchModal } from "./PairSearchModal";
@@ -36,15 +37,17 @@ type TickerCardProps = {
 function TickerCard({ ticker, active, onSelect }: TickerCardProps) {
   const isUp = ticker.trend === "up";
   return (
-    <button type="button" className={`ticker-card !transition-all !duration-300 !ease-out hover:-translate-y-0.5 hover:shadow-[0_6px_18px_rgba(212,168,83,0.14)] active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#F5B800]/40 motion-reduce:transform-none motion-reduce:!transition-none${active ? " active shadow-[0_5px_16px_rgba(212,168,83,0.18)]" : ""}`} onClick={() => onSelect(ticker.symbol)} aria-pressed={active}>
+    <Button variant="unstyled" type="button" className={`ticker-card !transition-all !duration-300 !ease-out hover:-translate-y-0.5 hover:shadow-[0_6px_18px_rgba(212,168,83,0.14)] active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#F5B800]/40 motion-reduce:transform-none motion-reduce:!transition-none${active ? " active shadow-[0_5px_16px_rgba(212,168,83,0.18)]" : ""}`} onClick={() => onSelect(ticker.symbol)} aria-pressed={active}>
       <InstrumentIcon type={ticker.icon} />
       <div className="ticker-copy">
         <span className="ticker-symbol">{ticker.symbol}</span>
         <strong className="ticker-price">{ticker.price}</strong>
-        <span className={`ticker-change ${ticker.trend}`}><span className="change-arrow">{isUp ? "▲" : "▼"}</span>{ticker.change}</span>
+        {ticker.change && (
+          <span className={`ticker-change ${ticker.trend}`}><span className="change-arrow">{isUp ? "▲" : "▼"}</span>{ticker.change}</span>
+        )}
       </div>
-      <TrendChart trend={ticker.trend} />
-    </button>
+      {ticker.change && <TrendChart trend={ticker.trend} />}
+    </Button>
   );
 }
 
@@ -59,6 +62,7 @@ type TopBarProps = ReturnType<typeof useTopbarInstruments> & {
 export default function TopBar({
   accountDetails,
   instruments,
+  availableInstruments,
   activeSymbol,
   setActiveSymbol,
   addInstrument,
@@ -113,12 +117,12 @@ export default function TopBar({
       </div>
       <AccountCard details={accountDetails} />
       <div className="topbar-actions">
-        <button type="button" className="topbar-action !transition-all !duration-300 !ease-out hover:-translate-y-0.5 hover:border-[#F5B800] hover:shadow-[0_5px_14px_rgba(212,168,83,0.16)] active:translate-y-0 active:scale-95 focus-visible:ring-2 focus-visible:ring-[#F5B800]/40 motion-reduce:transform-none motion-reduce:!transition-none" aria-label="Add instrument" aria-haspopup="dialog" onClick={() => setIsInstrumentModalOpen(true)}>+</button>
-        <button type="button" className="topbar-action theme-toggle !transition-all !duration-300 !ease-out hover:-translate-y-0.5 hover:border-[#F5B800] hover:shadow-[0_5px_14px_rgba(212,168,83,0.16)] active:translate-y-0 active:scale-95 focus-visible:ring-2 focus-visible:ring-[#F5B800]/40 motion-reduce:transform-none motion-reduce:!transition-none" aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} onClick={onThemeToggle}>
+        <Button variant="unstyled" type="button" className="topbar-action !transition-all !duration-300 !ease-out hover:-translate-y-0.5 hover:border-[#F5B800] hover:shadow-[0_5px_14px_rgba(212,168,83,0.16)] active:translate-y-0 active:scale-95 focus-visible:ring-2 focus-visible:ring-[#F5B800]/40 motion-reduce:transform-none motion-reduce:!transition-none" aria-label="Add instrument" aria-haspopup="dialog" onClick={() => setIsInstrumentModalOpen(true)}>+</Button>
+        <Button variant="unstyled" type="button" className="topbar-action theme-toggle !transition-all !duration-300 !ease-out hover:-translate-y-0.5 hover:border-[#F5B800] hover:shadow-[0_5px_14px_rgba(212,168,83,0.16)] active:translate-y-0 active:scale-95 focus-visible:ring-2 focus-visible:ring-[#F5B800]/40 motion-reduce:transform-none motion-reduce:!transition-none" aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} onClick={onThemeToggle}>
           {theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
-        </button>
+        </Button>
       </div>
-      {isInstrumentModalOpen && <PairSearchModal onClose={() => setIsInstrumentModalOpen(false)} onAdd={addPair} addedSymbols={addedSymbols} />}
+      {isInstrumentModalOpen && <PairSearchModal onClose={() => setIsInstrumentModalOpen(false)} onAdd={addPair} addedSymbols={addedSymbols} instruments={availableInstruments} />}
     </header>
   );
 }

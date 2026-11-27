@@ -1,3 +1,4 @@
+import { Button } from "@/src/components/ui/button";
 import "./OrderPanel.css";
 import { useState } from "react";
 import type { FormEvent } from "react";
@@ -21,7 +22,7 @@ export default function OrderPanel({ accountId, symbol, busy, onOpen }: OrderPan
 
   async function submitTrade(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!accountId || busy) return;
+    if (!accountId || !symbol || busy) return;
 
     const submitter = (event.nativeEvent as SubmitEvent).submitter;
     if (!(submitter instanceof HTMLButtonElement)) return;
@@ -60,7 +61,7 @@ export default function OrderPanel({ accountId, symbol, busy, onOpen }: OrderPan
           <strong className="text-sm">{symbol}</strong>
         </div>
 
-        <fieldset disabled={busy || !accountId} className="min-w-0 space-y-3">
+        <fieldset disabled={busy || !accountId || !symbol} className="min-w-0 space-y-3">
           <label className="block text-sm">
             <span className="mb-1 block">Volume (lots)</span>
             <input
@@ -102,20 +103,20 @@ export default function OrderPanel({ accountId, symbol, busy, onOpen }: OrderPan
           </label>
 
           <div className="flex gap-2">
-            <button
+            <Button variant="unstyled"
               type="submit"
               value="Buy"
               className="flex-1 rounded-lg bg-[#1FAE6A] px-2 py-2 font-semibold text-white hover:bg-[#1b9c5f] disabled:opacity-50"
             >
               Buy {base}
-            </button>
-            <button
+            </Button>
+            <Button variant="unstyled"
               type="submit"
               value="Sell"
               className="flex-1 rounded-lg bg-[#E5404C] px-2 py-2 font-semibold text-white hover:bg-[#d63943] disabled:opacity-50"
             >
               Sell {base}
-            </button>
+            </Button>
           </div>
         </fieldset>
 

@@ -1,8 +1,7 @@
 import { getMarketHistory } from "@/src/services/api/trading-center/get-trading-center-history.api";
 import type { Candle } from "@/src/types/market";
-import { getCandleStart } from "./liveCandles";
 
-const HISTORY_UTC_OFFSET = process.env.NEXT_PUBLIC_MARKET_HISTORY_UTC_OFFSET || "+11:00";
+const HISTORY_UTC_OFFSET = process.env.NEXT_PUBLIC_MARKET_HISTORY_UTC_OFFSET || "Z";
 const DATE_WITHOUT_OFFSET = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?$/;
 
 function normalizeCandleDate(date: string) {
@@ -16,27 +15,32 @@ function normalizeCandleDate(date: string) {
 
   if (!Number.isFinite(timestamp)) return "";
 
-  return new Date(getCandleStart(timestamp / 1000) * 1000).toISOString();
+  return new Date(timestamp).toISOString();
 }
 
-export async function fetchMarketHistory(symbol: string): Promise<Candle[]> {
-  const response = await getMarketHistory(symbol, "5min", "100");
+export async function fetchMarketHistory(
+  symbol: string,
+  interval: string,
+  to: number | undefined,
+  signal: AbortSignal,
+): Promise<Candle[]> {
+  const response = await getMarketHistory(symbol, interval, 200, to, signal);
 
   if (!response.success) {
     throw new Error(response.message);
   }
 
-  return (response.data ?? [])
-    .map((candle) => ({
-      ...candle,
-      date: normalizeCandleDate(candle.date),
-      open: Number(candle.open),
-      high: Number(candle.high),
-      low: Number(candle.low),
-      close: Number(candle.close),
-    }))
-    .filter(({ date, open, high, low, close }) =>
-      Boolean(date) && [open, high, low, close].every(Number.isFinite),
-    )
-    .sort((first, second) => Date.parse(first.date) - Date.parse(second.date));
+  const candlesByDate = new Map<string, Candle>();
+
+  for (const candle of response.data) {
+    if (!candle) continue;
+
+    const { open, high, low, close, volume } = candle;
+    const date = normalizeCandleDate(candle.date);
+    if (!date || ![open, high, low, close, volume].every(Number.isFinite)) continue;
+
+    candlesByDate.set(date, { date, open, high, low, close, volume });
+  }
+
+  return [...candlesByDate.values()].sort((first, second) => first.date.localeCompare(second.date));
 }

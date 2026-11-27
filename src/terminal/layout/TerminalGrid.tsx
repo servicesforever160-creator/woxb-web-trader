@@ -13,6 +13,8 @@ import SettingsBar from "../settings-bar/SettingsBar";
 import type { TerminalTab } from "../settings-bar/SettingsBar";
 import BottomBar from "../bottom-bar/BottomBar";
 import { useTradeActions } from "../hooks/useTradeActions";
+import { useMarketSocket } from "../hooks/useMarketSocket";
+import { useMarketSymbols } from "../hooks/useMarketSymbols";
 import { useTheme } from "../hooks/useTheme";
 import { useTopbarInstruments } from "../topbar/useTopbarInstruments";
 
@@ -31,7 +33,9 @@ export default function TerminalGrid({
 }) {
   const [activeTab, setActiveTab] = useState<TerminalTab>("market-watch");
   const { theme, toggleTheme } = useTheme();
-  const topbarInstruments = useTopbarInstruments();
+  const market = useMarketSymbols();
+  const { prices, subscribeToTicks } = useMarketSocket(market.symbols);
+  const topbarInstruments = useTopbarInstruments(market.symbols, prices);
   const trades = useTradeActions();
 
   return (
@@ -58,7 +62,12 @@ export default function TerminalGrid({
           >
             <div className="market-watch">
               {activeTab === "market-watch" ? (
-                <MarketWatch />
+                <MarketWatch
+                  market={market}
+                  prices={prices}
+                  activeSymbol={topbarInstruments.activeSymbol}
+                  onSelect={topbarInstruments.setActiveSymbol}
+                />
               ) : (
                 <div className="terminal-tab-placeholder">{TAB_LABELS[activeTab] ?? "Market Watch"}</div>
               )}
@@ -72,11 +81,14 @@ export default function TerminalGrid({
               <Group orientation="vertical" className="chart-panels">
                 <Panel defaultSize={75} minSize={40}>
                   <div className="chart-panel-content">
-                    <ChartArea
-                      key={topbarInstruments.activeSymbol}
-                      symbol={topbarInstruments.activeSymbol}
-                      theme={theme}
-                    />
+                    {topbarInstruments.activeSymbol && (
+                      <ChartArea
+                        key={topbarInstruments.activeSymbol}
+                        symbol={topbarInstruments.activeSymbol}
+                        theme={theme}
+                        subscribeToTicks={subscribeToTicks}
+                      />
+                    )}
                   </div>
                 </Panel>
 

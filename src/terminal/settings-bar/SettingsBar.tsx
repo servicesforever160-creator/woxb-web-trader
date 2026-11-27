@@ -1,3 +1,4 @@
+import { Button } from "@/src/components/ui/button";
 import { AlarmClock, CalendarDays, Menu, Settings } from "lucide-react";
 import "./SettingsBar.css"
 
@@ -19,7 +20,7 @@ export default function SettingsBar({ activeTab, onTabChange }: SettingsBarProps
   return (
     <nav className="settings-bar-panel" aria-label="Terminal tools">
       {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
-        <button
+        <Button variant="unstyled"
           key={id}
           className={`settings-nav-icon${activeTab === id ? " active" : ""}`}
           type="button"
@@ -29,7 +30,7 @@ export default function SettingsBar({ activeTab, onTabChange }: SettingsBarProps
           onClick={() => onTabChange(id)}
         >
           <Icon aria-hidden="true" />
-        </button>
+        </Button>
       ))}
     </nav>
   );

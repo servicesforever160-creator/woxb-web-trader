@@ -1,24 +1,16 @@
 import { Tab, Tabs } from "@mui/material";
 
-const MARKET_TABS = [
-  { value: "favorite", label: "Favorite" },
-  { value: "Forex", label: "Forex" },
-  { value: "Crypto", label: "Crypto" },
-  { value: "Metals", label: "Metals" },
-] as const;
-
-export type MarketCategory = (typeof MARKET_TABS)[number]["value"];
-
 type MarketTabsProps = {
-  value: MarketCategory;
-  onChange: (value: MarketCategory) => void;
+  categories: string[];
+  value: string;
+  onChange: (value: string) => void;
 };
 
-export default function MarketTabs({ value, onChange }: MarketTabsProps) {
+export default function MarketTabs({ categories, value, onChange }: MarketTabsProps) {
   return (
     <Tabs
       value={value}
-      onChange={(_, nextValue: MarketCategory) => onChange(nextValue)}
+      onChange={(_, nextValue: string) => onChange(nextValue)}
       variant="scrollable"
       scrollButtons={false}
       aria-label="Market categories"
@@ -40,7 +32,15 @@ export default function MarketTabs({ value, onChange }: MarketTabsProps) {
         "& .MuiTab-root.Mui-selected": { color: "#F5B800", fontWeight: 700 },
       }}
     >
-      {MARKET_TABS.map((tab) => <Tab key={tab.value} value={tab.value} label={tab.label} disableRipple />)}
+      <Tab value="favorite" label="Favorites" disableRipple />
+      {categories.map((category) => (
+        <Tab
+          key={category}
+          value={category}
+          label={category.toLowerCase().replace(/(^|[_ -])\w/g, (letter) => letter.toUpperCase()).replaceAll("_", " ")}
+          disableRipple
+        />
+      ))}
     </Tabs>
   );
 }

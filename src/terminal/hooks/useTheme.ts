@@ -12,6 +12,16 @@ export function useTheme() {
   const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
+    const root = document.documentElement;
+    const wasDark = root.classList.contains("dark");
+    root.classList.toggle("dark", theme === "dark");
+
+    return () => {
+      root.classList.toggle("dark", wasDark);
+    };
+  }, [theme]);
+
+  useEffect(() => {
     const savedTheme = localStorage.getItem(THEME_KEY) as Theme | null;
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 

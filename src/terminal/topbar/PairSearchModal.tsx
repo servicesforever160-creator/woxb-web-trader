@@ -1,15 +1,16 @@
+import { Button } from "@/src/components/ui/button";
 import { useEffect, useMemo, useState } from "react";
 import { InstrumentIcon } from "./InstrumentIcon";
-import { INSTRUMENTS } from "./instruments.data";
 import type { Instrument } from "./instruments.data";
 
 type PairSearchModalProps = {
   onClose: () => void;
   onAdd: (instrument: Instrument) => void;
   addedSymbols: string[];
+  instruments: Instrument[];
 };
 
-export function PairSearchModal({ onClose, onAdd, addedSymbols }: PairSearchModalProps) {
+export function PairSearchModal({ onClose, onAdd, addedSymbols, instruments }: PairSearchModalProps) {
   const [query, setQuery] = useState("");
 
   useEffect(() => {
@@ -20,15 +21,15 @@ export function PairSearchModal({ onClose, onAdd, addedSymbols }: PairSearchModa
 
   const filteredPairs = useMemo(() => {
     const term = query.trim().toLowerCase();
-    return !term ? INSTRUMENTS : INSTRUMENTS.filter(({ symbol, name }) => `${symbol} ${name}`.toLowerCase().includes(term));
-  }, [query]);
+    return !term ? instruments : instruments.filter(({ symbol, name }) => `${symbol} ${name}`.toLowerCase().includes(term));
+  }, [query, instruments]);
 
   return (
     <div className="instrument-modal-backdrop" role="presentation" onMouseDown={onClose}>
       <section className="instrument-modal" role="dialog" aria-modal="true" aria-labelledby="instrument-modal-title" onMouseDown={(event) => event.stopPropagation()}>
         <div className="instrument-modal-header">
           <div><p className="instrument-modal-eyebrow">Market watch</p><h2 id="instrument-modal-title">Add currency pair</h2></div>
-          <button type="button" className="instrument-modal-close" onClick={onClose} aria-label="Close modal">×</button>
+          <Button variant="unstyled" type="button" className="instrument-modal-close" onClick={onClose} aria-label="Close modal">×</Button>
         </div>
         <label className="instrument-search">
           <span aria-hidden="true">⌕</span>
@@ -43,8 +44,8 @@ export function PairSearchModal({ onClose, onAdd, addedSymbols }: PairSearchModa
                 return <tr key={pair.symbol}>
                   <td><div className="pair-name"><InstrumentIcon type={pair.icon} /><span><strong>{pair.symbol}</strong><small>{pair.name}</small></span></div></td>
                   <td>{pair.price}</td>
-                  <td className={`pair-change ${pair.trend}`}>{pair.trend === "up" ? "+" : "-"}{pair.change}</td>
-                  <td><button type="button" className={`add-pair-button ${isAdded ? "is-added" : "is-available"}`} disabled={isAdded} onClick={() => onAdd(pair)}>{isAdded ? "✓ Added" : "+ Add"}</button></td>
+                  <td className={`pair-change ${pair.trend}`}>{pair.change ? `${pair.trend === "up" ? "+" : "-"}${pair.change}` : "—"}</td>
+                  <td><Button variant="unstyled" type="button" className={`add-pair-button ${isAdded ? "is-added" : "is-available"}`} disabled={isAdded} onClick={() => onAdd(pair)}>{isAdded ? "✓ Added" : "+ Add"}</Button></td>
                 </tr>;
               })}
             </tbody>

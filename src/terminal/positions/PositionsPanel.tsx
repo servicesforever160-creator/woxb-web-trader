@@ -1,3 +1,4 @@
+import { Button } from "@/src/components/ui/button";
 import { useEffect, useState } from "react";
 import { Tab, Tabs } from "@mui/material";
 import { getOpenTrades } from "@/src/services/api/trade/get-open-trades.api";
@@ -108,7 +109,7 @@ function TradeTable({ tab, accountId, revision, busy, onClose }: TradeTableProps
               ))}
               {tab === "positions" && (
                 <td>
-                  <button
+                  <Button variant="unstyled"
                     type="button"
                     className="table-action"
                     disabled={busy}
@@ -116,7 +117,7 @@ function TradeTable({ tab, accountId, revision, busy, onClose }: TradeTableProps
                     onClick={() => void closePosition(trade)}
                   >
                     Close
-                  </button>
+                  </Button>
                 </td>
               )}
             </tr>
@@ -139,23 +140,23 @@ function TradeTable({ tab, accountId, revision, busy, onClose }: TradeTableProps
 
       {(page > 1 || pagination?.hasNextPage) && (
         <nav aria-label="Trade pages" className="flex items-center gap-3 px-3 py-2 text-xs">
-          <button
+          <Button variant="unstyled"
             type="button"
             className="table-action"
             disabled={page === 1 || !current}
             onClick={() => setPage(page - 1)}
           >
             Previous
-          </button>
+          </Button>
           <span>Page {page}</span>
-          <button
+          <Button variant="unstyled"
             type="button"
             className="table-action"
             disabled={!pagination?.hasNextPage}
             onClick={() => setPage(page + 1)}
           >
             Next
-          </button>
+          </Button>
         </nav>
       )}
     </div>

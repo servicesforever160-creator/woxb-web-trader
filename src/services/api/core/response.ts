@@ -20,7 +20,7 @@ interface ApiError {
   response?: {
     data?: {
       message?: string;
-      errors?: ValidationError[];
+      errors?: ValidationError[] | null;
       data?: any;
     };
   };
@@ -31,14 +31,13 @@ export interface BackendResponse<T> {
   status: boolean;
   message: string;
   data: T;
+  errors?: ValidationError[] | null;
 }
 
 export interface BackendError {
+  status?: boolean;
   message?: string;
-  errors?: Array<{
-    field?: string;
-    message: string;
-  }>;
+  errors?: ValidationError[] | null;
 }
 
 export const successResponse = <T>(

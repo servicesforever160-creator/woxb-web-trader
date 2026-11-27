@@ -1,10 +1,26 @@
-export const SYMBOLS = [
-  { PairSymbol: "E/U", Pair: "EUR/USD", category: "Forex", isFavorite: true, CurrentPrice: 1.08562, spread: 0.1, PercentageChange: -0.08 },
-  { PairSymbol: "G/U", Pair: "GBP/USD", category: "Forex", isFavorite: true, CurrentPrice: 1.08562, spread: 0.1, PercentageChange: 0.08 },
-  { PairSymbol: "U/J", Pair: "USD/JPY", category: "Forex", isFavorite: true, CurrentPrice: 1.08562, spread: 0.1, PercentageChange: -0.08 },
-  { PairSymbol: "A/U", Pair: "AUD/USD", category: "Forex", isFavorite: true, CurrentPrice: 1.08562, spread: 0.1, PercentageChange: -0.08 },
-  { PairSymbol: "B/U", Pair: "BTC/USD", category: "Crypto", isFavorite: true, CurrentPrice: 1.08562, spread: 0.1, PercentageChange: -0.08 },
-  { PairSymbol: "E/U", Pair: "ETH/USD", category: "Crypto", isFavorite: true, CurrentPrice: 1.08562, spread: 0.1, PercentageChange: 0.08 },
-  { PairSymbol: "X/U", Pair: "XAU/USD", category: "Metals", isFavorite: true, CurrentPrice: 1.08562, spread: 0.1, PercentageChange: -0.08 },
-  { PairSymbol: "X/U", Pair: "XAG/USD", category: "Metals", isFavorite: true, CurrentPrice: 1.08562, spread: 0.1, PercentageChange: -0.08 },
-];
+import type { MarketSymbols } from "@/src/services/api/market/get-market-symbols.api";
+import { INSTRUMENTS } from "../topbar/instruments.data";
+
+export type MarketSymbol = {
+  accountSymbol: string;
+  baseSymbol: string;
+  symbol: string;
+  category: string;
+};
+
+export function getBaseSymbol(symbol: string) {
+  return symbol.split(".")[0].replaceAll("/", "").toUpperCase();
+}
+
+export function toMarketSymbols(categories: MarketSymbols): MarketSymbol[] {
+  return Object.entries(categories).flatMap(([category, symbols]) =>
+    [...new Set(symbols)].map((accountSymbol) => {
+      const baseSymbol = getBaseSymbol(accountSymbol);
+      const known = INSTRUMENTS.find((instrument) => getBaseSymbol(instrument.symbol) === baseSymbol);
+      const pair = /^(.*?)(USDT|USDC|USD|EUR|GBP|JPY|CHF|CAD|AUD|NZD|BTC|ETH)$/.exec(baseSymbol);
+      const symbol = known?.symbol ?? (pair && pair[1] ? `${pair[1]}/${pair[2]}` : baseSymbol);
+
+      return { accountSymbol, baseSymbol, symbol, category };
+    }),
+  );
+}

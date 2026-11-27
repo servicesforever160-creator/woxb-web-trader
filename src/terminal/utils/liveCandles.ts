@@ -1,21 +1,15 @@
 import type { Candle, MarketTick } from "@/src/types/market";
 
-const FIVE_MINUTES = 300;
-
 export type LiveCandle = Candle & { lastTick: number };
 
-export function getCandleStart(timestamp: number) {
-  return Math.floor(timestamp / FIVE_MINUTES) * FIVE_MINUTES;
-}
-
-export function applyMarketTick(candles: LiveCandle[], tick: MarketTick): LiveCandle[] {
+export function applyMarketTick(candles: LiveCandle[], tick: MarketTick, intervalSeconds: number): LiveCandle[] {
   const { price, timestamp } = tick;
   if (typeof timestamp !== "number" || !Number.isFinite(timestamp) || !Number.isFinite(price)) {
     console.log("[Market chart] Skipped tick with invalid price or timestamp", tick);
     return candles;
   }
 
-  const start = getCandleStart(timestamp);
+  const start = Math.floor(timestamp / intervalSeconds) * intervalSeconds;
   const date = new Date(start * 1000);
   if (!Number.isFinite(date.getTime()) || timestamp <= 0) {
     console.log("[Market chart] Skipped tick with invalid candle date", tick);

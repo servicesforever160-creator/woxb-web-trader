@@ -1,6 +1,15 @@
+import type { ReactNode } from "react";
 import type { Candle } from "@/src/types/market";
 
-export default function ChartHeader({ symbol, candle }: { symbol: string; candle?: Candle }) {
+export default function ChartHeader({
+  symbol,
+  candle,
+  timeframe,
+}: {
+  symbol: string;
+  candle?: Candle;
+  timeframe: ReactNode;
+}) {
   return (
     <div className="chart-header">
 
@@ -8,9 +17,7 @@ export default function ChartHeader({ symbol, candle }: { symbol: string; candle
         {symbol}
       </div>
 
-      <div className="chart-timeframe">
-        5m
-      </div>
+      {timeframe}
 
       {candle && (
         <div className="chart-ohlc">

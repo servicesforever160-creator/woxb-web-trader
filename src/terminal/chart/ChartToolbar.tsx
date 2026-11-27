@@ -1,7 +1,7 @@
+import { Button } from "@/src/components/ui/button";
 import { useEffect, useRef, useState } from "react";
 import type { MouseEventHandler, ReactNode } from "react";
 import {
-  ArrowIcon,
   BrushIcon,
   ChevronIcon,
   CrossIcon,
@@ -20,26 +20,28 @@ import {
   TrendLineIcon,
   ZoomInIcon,
 } from "./tools/ToolBarIcons";
+import type { DrawingTool } from "./tools/chartDrawings";
 
-type ToolItem = {
+type ToolbarItem = {
   icon: ReactNode;
-  label: string;
-  dropdown?: boolean;
-  active?: boolean;
-  onClick?: MouseEventHandler<HTMLButtonElement>;
+  label: ToolbarAction;
 };
 
-const TOOL_GROUPS: { items: ToolItem[] }[] = [
+export type ToolbarAction = DrawingTool | "Cross" | "Zoom In" | "Magnet Mode"
+  | "Keep drawing" | "Lock all drawings" | "Hide all drawings" | "Remove drawings"
+  | "Show Object Tree";
+
+const TOOL_GROUPS: { items: ToolbarItem[] }[] = [
   {
     items: [
-      { icon: <CrossIcon />, label: "Cross", dropdown: true },
-      { icon: <TrendLineIcon />, label: "Trend Line", dropdown: true },
-      { icon: <FibIcon />, label: "Fib Retracement", dropdown: true },
-      { icon: <PatternIcon />, label: "XABCD Pattern", dropdown: true },
-      { icon: <LongPositionIcon />, label: "Long Position", dropdown: true },
-      { icon: <BrushIcon />, label: "Brush", dropdown: true },
-      { icon: <TextIcon />, label: "Text", dropdown: true },
-      { icon: <SmileyIcon />, label: "Icon", dropdown: true },
+      { icon: <CrossIcon />, label: "Cross" },
+      { icon: <TrendLineIcon />, label: "Trend Line" },
+      { icon: <FibIcon />, label: "Fib Retracement" },
+      { icon: <PatternIcon />, label: "XABCD Pattern" },
+      { icon: <LongPositionIcon />, label: "Long Position" },
+      { icon: <BrushIcon />, label: "Brush" },
+      { icon: <TextIcon />, label: "Text" },
+      { icon: <SmileyIcon />, label: "Icon" },
     ],
   },
   {
@@ -50,22 +52,27 @@ const TOOL_GROUPS: { items: ToolItem[] }[] = [
   },
   {
     items: [
-      { icon: <MagnetIcon />, label: "Magnet Mode", dropdown: true, active: true },
+      { icon: <MagnetIcon />, label: "Magnet Mode" },
       { icon: <KeepDrawingIcon />, label: "Keep drawing" },
       { icon: <LockIcon />, label: "Lock all drawings" },
-      { icon: <HideAllIcon />, label: "Hide all drawings", dropdown: true },
+      { icon: <HideAllIcon />, label: "Hide all drawings" },
     ],
   },
   {
-    items: [{ icon: <TrashIcon />, label: "Remove drawings", dropdown: true }],
+    items: [{ icon: <TrashIcon />, label: "Remove drawings" }],
+  },
+  {
+    items: [{ icon: <ObjectTreeIcon />, label: "Show Object Tree" }],
   },
 ];
 
-const OBJECT_TREE_GROUP: { items: ToolItem[] } = {
-  items: [{ icon: <ObjectTreeIcon />, label: "Show Object Tree" }],
+type ChartToolbarProps = {
+  active: Partial<Record<ToolbarAction, boolean>>;
+  locked: boolean;
+  onAction: (action: ToolbarAction) => void;
 };
 
-export default function ChartToolbar() {
+export default function ChartToolbar({ active, locked, onAction }: ChartToolbarProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollUp, setCanScrollUp] = useState(false);
   const [canScrollDown, setCanScrollDown] = useState(false);
@@ -109,16 +116,26 @@ export default function ChartToolbar() {
       >
         {TOOL_GROUPS.map((group, gi) => (
           <div key={gi} className="flex flex-col items-center border-b border-[var(--terminal-border)] py-0.5">
-            {group.items.map((item, i) => (
-              <ToolbarButton key={i} {...item} />
+            {group.items.map(({ icon, label }) => (
+              <Button variant="unstyled"
+                key={label}
+                type="button"
+                title={label}
+                aria-label={label}
+                aria-pressed={active[label]}
+                disabled={locked && label === "Remove drawings"}
+                onClick={() => onAction(label)}
+                className={`
+                  tool-bar-icons flex h-12 w-12 items-center justify-center
+                  [&>svg]:!h-[26px] [&>svg]:!w-[26px] transition disabled:opacity-40
+                  ${active[label] ? "text-[var(--terminal-text)] bg-[var(--terminal-muted)]" : "text-[var(--terminal-muted-text)] hover:text-[var(--terminal-text)] hover:bg-[var(--terminal-muted)]"}
+                `}
+              >
+                {icon}
+              </Button>
             ))}
           </div>
         ))}
-        <div className="flex flex-col items-center py-0.5">
-          {OBJECT_TREE_GROUP.items.map((item, i) => (
-          <ToolbarButton key={i} {...item} />
-          ))}
-        </div>
       </div>
 
       {canScrollUp && <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center bg-gradient-to-b from-[var(--terminal-card)] to-transparent pb-3 opacity-0 transition-opacity group-hover/chart-toolbar:pointer-events-auto group-hover/chart-toolbar:opacity-100 focus-within:pointer-events-auto focus-within:opacity-100">
@@ -131,7 +148,6 @@ export default function ChartToolbar() {
     </div>
   );
 }
-
 type ScrollButtonProps = {
   direction: "up" | "down";
   onClick: MouseEventHandler<HTMLButtonElement>;
@@ -141,7 +157,7 @@ function ScrollButton({ direction, onClick }: ScrollButtonProps) {
   const isDown = direction === "down";
 
   return (
-    <button
+    <Button variant="unstyled"
       title={`Scroll tools ${direction}`}
       aria-label={`Scroll tools ${direction}`}
       onClick={onClick}
@@ -152,41 +168,6 @@ function ScrollButton({ direction, onClick }: ScrollButtonProps) {
       `}
     >
       <ChevronIcon direction={direction} />
-    </button>
-  );
-}
-
-function ToolbarButton({ icon, label, dropdown, active, onClick }: ToolItem) {
-  return (
-    <div className="group/tool relative flex items-center">
-      <button
-        title={label}
-        aria-label={label}
-        onClick={onClick}
-        className={`
-          tool-bar-icons
-          h-12
-          w-12
-          flex
-          items-center
-          justify-center
-          [&>svg]:!h-[26px]
-          [&>svg]:!w-[26px]
-          transition
-          ${active ? "text-[var(--terminal-text)] bg-[var(--terminal-muted)]" : "text-[var(--terminal-muted-text)] hover:text-[var(--terminal-text)] hover:bg-[var(--terminal-muted)]"}
-        `}
-      >
-        {icon}
-      </button>
-
-      {dropdown && (
-        <button
-          aria-label={`${label} options`}
-          className="pointer-events-none absolute right-0 top-0 bottom-0 flex w-3.5 items-center justify-center text-[var(--terminal-muted-text)] opacity-0 transition-opacity group-hover/tool:pointer-events-auto group-hover/tool:opacity-100 hover:text-[var(--terminal-text)]"
-        >
-          <ArrowIcon />
-        </button>
-      )}
-    </div>
+    </Button>
   );
 }
