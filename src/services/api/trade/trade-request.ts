@@ -4,6 +4,7 @@ import { terminalRequest } from "../core/terminal-request";
 
 export async function tradeRequest<T>(
   request: (config: AxiosRequestConfig) => Promise<BackendResponse<T>>,
+  signal?: AbortSignal,
 ) {
-  return terminalRequest(request, "The trade request failed.");
+  return terminalRequest(request, "The trade request failed.", signal);
 }

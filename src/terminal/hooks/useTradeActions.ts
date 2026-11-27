@@ -8,7 +8,6 @@ import type { TradeSound } from "../utils/tradeSound";
 export function useTradeActions() {
   const pending = useRef(false);
   const [busy, setBusy] = useState(false);
-  const [revision, setRevision] = useState(0);
 
   async function execute(
     sound: TradeSound,
@@ -26,7 +25,6 @@ export function useTradeActions() {
     try {
       const result = await request();
       if (result.success) {
-        setRevision((current) => current + 1);
         void playTradeSound(audio, sound);
       }
       return result;
@@ -38,7 +36,6 @@ export function useTradeActions() {
 
   return {
     busy,
-    revision,
     open: (payload: OpenTradeRequest) => execute("open", () => openTrade(payload)),
     close: (tradeId: string) => execute("close", () => closeTrade({ trade_id: tradeId })),
   };

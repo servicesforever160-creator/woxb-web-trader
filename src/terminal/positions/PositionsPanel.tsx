@@ -1,9 +1,9 @@
 import { Button } from "@/src/components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Tab, Tabs } from "@mui/material";
-import { getOpenTrades } from "@/src/services/api/trade/get-open-trades.api";
 import { getTradeHistory } from "@/src/services/api/trade/get-trade-history.api";
-import type { Trade, TradePage } from "@/src/services/api/trade/trade.types";
+import type { SubscribeToTradeEvents, Trade, TradePage } from "@/src/services/api/trade/trade.types";
+import { TRADE_PAGE_SIZE, useLivePositions } from "../hooks/useLivePositions";
 import "./Positions.css";
 import { POSITION_TABS, TRADE_COLUMNS, getTradeCells } from "./positions.data";
 import type { PositionTabId } from "./positions.data";
@@ -20,48 +20,52 @@ function getCellClass(value: string, column: string) {
 
 type PositionsPanelProps = {
   accountId?: string;
-  revision: number;
+  subscribeToTrades: SubscribeToTradeEvents;
   busy: boolean;
   onClose: (tradeId: string) => Promise<{ success: boolean; message: string }>;
 };
 
 type TradeTabId = Exclude<PositionTabId, "accountHistory">;
 
-type TradeTableProps = PositionsPanelProps & {
+type TradeTableProps = Omit<PositionsPanelProps, "subscribeToTrades"> & {
   tab: TradeTabId;
+  live: ReturnType<typeof useLivePositions>;
 };
 
 type TradeLoad = {
   page: number;
-  revision: number;
   data?: TradePage;
   error?: string;
 };
 
-function TradeTable({ tab, accountId, revision, busy, onClose }: TradeTableProps) {
-  const [page, setPage] = useState(1);
+function TradeTable({ tab, accountId, live, busy, onClose }: TradeTableProps) {
+  const [requestedPage, setPage] = useState(1);
   const [loaded, setLoaded] = useState<TradeLoad>();
   const [feedback, setFeedback] = useState<{ success: boolean; message: string }>();
   const columns = TRADE_COLUMNS[tab];
+  const isHistory = tab === "history";
+  const { positions, closed, ready, error: positionsError, reconnects } = live;
+  const openTrades = useMemo(() => [...positions.values()].sort((first, second) =>
+    (second.open_time ?? "").localeCompare(first.open_time ?? ""),
+  ), [positions]);
+  const totalOpenPages = Math.max(1, Math.ceil(openTrades.length / TRADE_PAGE_SIZE));
+  const page = isHistory ? requestedPage : Math.min(requestedPage, totalOpenPages);
 
   useEffect(() => {
-    if (!accountId) return;
+    if (!accountId || !isHistory) return;
 
-    let active = true;
-    const request = tab === "history"
-      ? getTradeHistory(accountId, page)
-      : getOpenTrades(page);
+    const controller = new AbortController();
 
-    void request.then((result) => {
-      if (!active) return;
+    void getTradeHistory(accountId, page, TRADE_PAGE_SIZE, controller.signal).then((result) => {
+      if (controller.signal.aborted) return;
 
       if (!result.success) {
-        setLoaded({ page, revision, error: result.message });
+        setLoaded({ page, error: result.message });
         return;
       }
 
       if (!Array.isArray(result.data?.data) || !result.data.pagination) {
-        setLoaded({ page, revision, error: "The trade list response is incomplete." });
+        setLoaded({ page, error: "The trade list response is incomplete." });
         return;
       }
 
@@ -71,17 +75,31 @@ function TradeTable({ tab, accountId, revision, busy, onClose }: TradeTableProps
         return;
       }
 
-      setLoaded({ page, revision, data: result.data });
+      setLoaded({ page, data: result.data });
     });
 
-    return () => {
-      active = false;
-    };
-  }, [accountId, page, revision, tab]);
+    return () => controller.abort();
+  }, [accountId, isHistory, page, reconnects]);
 
-  const current = loaded?.page === page && loaded.revision === revision ? loaded : undefined;
-  const trades = current?.data?.data ?? [];
-  const pagination = current?.data?.pagination;
+  const current = loaded?.page === page ? loaded : undefined;
+  const historyTrades = useMemo(() => {
+    const saved = current?.data?.data ?? [];
+    if (page !== 1 || closed.size === 0) return saved;
+
+    const merged = new Map(saved.map((trade) => [trade.id, trade]));
+    for (const [id, trade] of closed) merged.set(id, trade);
+
+    return [...merged.values()].sort((first, second) =>
+      (second.close_time ?? "").localeCompare(first.close_time ?? ""),
+    );
+  }, [closed, current, page]);
+  const start = (page - 1) * TRADE_PAGE_SIZE;
+  const trades = isHistory ? historyTrades.slice(0, TRADE_PAGE_SIZE) : openTrades.slice(start, start + TRADE_PAGE_SIZE);
+  const hasNextPage = isHistory
+    ? current?.data?.pagination.hasNextPage || historyTrades.length > TRADE_PAGE_SIZE
+    : page < totalOpenPages;
+  const loadedPage = isHistory ? Boolean(current) : ready;
+  const error = isHistory ? current?.error : positionsError;
 
   async function closePosition(trade: Trade) {
     setFeedback(undefined);
@@ -90,8 +108,8 @@ function TradeTable({ tab, accountId, revision, busy, onClose }: TradeTableProps
 
   let message = tab === "history" ? "No closed trades." : "No open trades.";
   if (!accountId) message = "Start an account session to view trades.";
-  else if (!current) message = "Loading trades?";
-  else if (current.error) message = current.error;
+  else if (error) message = error;
+  else if (!loadedPage) message = "Loading trades…";
 
   return (
     <div className="positions-table-wrap">
@@ -125,7 +143,7 @@ function TradeTable({ tab, accountId, revision, busy, onClose }: TradeTableProps
           {trades.length === 0 && (
             <tr>
               <td className="positions-empty" colSpan={columns.length}>
-                <span role={current?.error ? "alert" : "status"}>{message}</span>
+                <span role={error ? "alert" : "status"}>{message}</span>
               </td>
             </tr>
           )}
@@ -138,12 +156,12 @@ function TradeTable({ tab, accountId, revision, busy, onClose }: TradeTableProps
         </p>
       )}
 
-      {(page > 1 || pagination?.hasNextPage) && (
+      {(page > 1 || hasNextPage) && (
         <nav aria-label="Trade pages" className="flex items-center gap-3 px-3 py-2 text-xs">
           <Button variant="unstyled"
             type="button"
             className="table-action"
-            disabled={page === 1 || !current}
+            disabled={page === 1 || !loadedPage}
             onClick={() => setPage(page - 1)}
           >
             Previous
@@ -152,7 +170,7 @@ function TradeTable({ tab, accountId, revision, busy, onClose }: TradeTableProps
           <Button variant="unstyled"
             type="button"
             className="table-action"
-            disabled={!pagination?.hasNextPage}
+            disabled={!hasNextPage}
             onClick={() => setPage(page + 1)}
           >
             Next
@@ -163,8 +181,9 @@ function TradeTable({ tab, accountId, revision, busy, onClose }: TradeTableProps
   );
 }
 
-export default function PositionsPanel(props: PositionsPanelProps) {
+export default function PositionsPanel({ subscribeToTrades, ...props }: PositionsPanelProps) {
   const [activeTab, setActiveTab] = useState<PositionTabId>("positions");
+  const live = useLivePositions(props.accountId, subscribeToTrades);
 
   return (
     <section className="positions-panel" aria-label="Trading activity">
@@ -205,7 +224,7 @@ export default function PositionsPanel(props: PositionsPanelProps) {
       {activeTab === "accountHistory" ? (
         <p className="positions-empty px-3 py-4">Account transaction history is unavailable.</p>
       ) : (
-        <TradeTable key={activeTab} tab={activeTab} {...props} />
+        <TradeTable key={activeTab} tab={activeTab} live={live} {...props} />
       )}
     </section>
   );

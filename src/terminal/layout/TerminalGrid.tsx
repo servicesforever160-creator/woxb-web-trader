@@ -34,7 +34,7 @@ export default function TerminalGrid({
   const [activeTab, setActiveTab] = useState<TerminalTab>("market-watch");
   const { theme, toggleTheme } = useTheme();
   const market = useMarketSymbols();
-  const { quotes, subscribeToTicks } = useMarketSocket(market.symbols);
+  const { quotes, subscribeToTicks, subscribeToTrades } = useMarketSocket(market.symbols);
   const topbarInstruments = useTopbarInstruments(market.symbols, quotes);
   const { activeSymbol } = topbarInstruments;
   const displaySymbol = market.symbols.find(({ symbol }) => symbol === activeSymbol)?.displaySymbol ?? activeSymbol;
@@ -103,7 +103,7 @@ export default function TerminalGrid({
                     <PositionsPanel
                       key={accountId}
                       accountId={accountId}
-                      revision={trades.revision}
+                      subscribeToTrades={subscribeToTrades}
                       busy={trades.busy}
                       onClose={trades.close}
                     />

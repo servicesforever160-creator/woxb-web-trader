@@ -34,6 +34,12 @@ export type Trade = {
   pnl: string;
 };
 
+export type TradeSocketEvent =
+  | { type: "open" | "update" | "close"; trade: Trade }
+  | { type: "reconnect" };
+
+export type SubscribeToTradeEvents = (listener: (event: TradeSocketEvent) => void) => () => void;
+
 export type TradePage = {
   data: Trade[];
   pagination: {
