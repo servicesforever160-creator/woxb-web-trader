@@ -1,7 +1,11 @@
+import type { MarketQuoteSide } from "@/src/types/market";
+
 export type Instrument = {
   symbol: string;
+  displaySymbol?: string;
   name: string;
   price: string;
+  priceDirection?: MarketQuoteSide["direction"];
   change: string;
   trend: "up" | "down";
   icon: string;

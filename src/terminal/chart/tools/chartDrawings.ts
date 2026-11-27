@@ -1,6 +1,7 @@
 import type {
   IChartApi,
   IPrimitivePaneView,
+  ISeriesPrimitiveAxisView,
   ISeriesApi,
   Time,
 } from "lightweight-charts";
@@ -32,7 +33,41 @@ export type ChartDrawing = {
   activeAnchor?: number;
 };
 
-const FIB_LEVELS = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+const FIB_LEVELS = [
+  { level: 0, color: "#787b86" },
+  { level: 0.236, color: "#f23645" },
+  { level: 0.382, color: "#ff9800" },
+  { level: 0.5, color: "#4caf50" },
+  { level: 0.618, color: "#089981" },
+  { level: 0.786, color: "#00bcd4" },
+  { level: 1, color: "#787b86" },
+];
+const DRAWING_BLUE = "#2962ff";
+const POSITION_COLORS = ["#787b86", "#089981", "#f23645"];
+
+function drawingColor(drawing: ChartDrawing) {
+  if (drawing.tool === "Measure" && drawing.points.length >= 2) {
+    return drawing.points[1].price < drawing.points[0].price ? "#f23645" : DRAWING_BLUE;
+  }
+  return DRAWING_BLUE;
+}
+
+function drawingPrices(drawing: ChartDrawing) {
+  const { points, tool } = drawing;
+  if (tool === "Fib Retracement" && points.length === 2) {
+    const [first, last] = points;
+    return FIB_LEVELS.map(({ level, color }) => ({
+      price: last.price + (first.price - last.price) * level,
+      color,
+    }));
+  }
+
+  const anchors = tool === "Brush" && points.length > 1 ? [points[0], points[points.length - 1]] : points;
+  return anchors.map(({ price }, index) => ({
+    price,
+    color: tool === "Long Position" ? POSITION_COLORS[index] : drawingColor(drawing),
+  }));
+}
 
 export function moveDrawingAnchor(drawing: ChartDrawing, index: number, point: DrawingPoint) {
   const points = drawing.points.map((anchor, anchorIndex) => {
@@ -67,14 +102,13 @@ export function projectDrawingPoint(
 
 export function createDrawingLayer(chart: IChartApi, series: ISeriesApi<"Candlestick">) {
   let drawings: ChartDrawing[] = [];
+  let axisViews: ISeriesPrimitiveAxisView[] = [];
 
   const view: IPrimitivePaneView = {
     zOrder: () => "top",
     renderer: () => ({
       draw(target) {
         target.useMediaCoordinateSpace(({ context }) => {
-          context.strokeStyle = "#d4a853";
-          context.fillStyle = "#d4a853";
           context.lineWidth = 2;
           context.font = "12px sans-serif";
 
@@ -82,11 +116,14 @@ export function createDrawingLayer(chart: IChartApi, series: ISeriesApi<"Candles
             const points = drawing.points.map((point) => projectDrawingPoint(chart, series, point));
 
             if (points.some((point) => point === null)) continue;
+            context.strokeStyle = drawingColor(drawing);
+            context.fillStyle = drawingColor(drawing);
             drawDrawing(context, drawing, points.filter((point) => point !== null));
 
             const anchor = drawing.activeAnchor === undefined ? null : points[drawing.activeAnchor];
             if (anchor) {
               context.beginPath();
+              context.strokeStyle = DRAWING_BLUE;
               context.arc(anchor.x, anchor.y, 5, 0, 2 * Math.PI);
               context.stroke();
             }
@@ -103,10 +140,25 @@ export function createDrawingLayer(chart: IChartApi, series: ISeriesApi<"Candles
     attached: (params) => { requestUpdate = params.requestUpdate; },
     detached: () => { requestUpdate = undefined; },
     paneViews: () => views,
+    priceAxisViews: () => axisViews,
   });
 
   return (nextDrawings: ChartDrawing[]) => {
     drawings = nextDrawings;
+    const labels = new Map<number, string>();
+    for (const drawing of drawings) {
+      for (const { price, color } of drawingPrices(drawing)) labels.set(price, color);
+    }
+    axisViews = [...labels].map(([price, color]) => ({
+      coordinate: () => series.priceToCoordinate(price) ?? -1,
+      text: () => series.priceFormatter().format(price),
+      textColor: () => "#ffffff",
+      backColor: () => color,
+      visible: () => {
+        const coordinate = series.priceToCoordinate(price);
+        return coordinate !== null && coordinate >= 0 && coordinate <= chart.paneSize().height;
+      },
+    }));
     requestUpdate?.();
   };
 }
@@ -135,7 +187,9 @@ function drawDrawing(
     context.arc(start.x, start.y, 3, 0, 2 * Math.PI);
     context.fill();
   } else if (drawing.tool === "Fib Retracement" && end) {
-    for (const level of FIB_LEVELS) {
+    for (const { level, color } of FIB_LEVELS) {
+      context.strokeStyle = color;
+      context.fillStyle = color;
       const y = end.y + (start.y - end.y) * level;
       line({ x: start.x, y }, { x: end.x, y });
       const [first, last] = drawing.points;
@@ -144,9 +198,9 @@ function drawDrawing(
     }
   } else if (drawing.tool === "Long Position" && end && stop) {
     context.save();
-    context.fillStyle = "rgba(38, 166, 154, 0.25)";
+    context.fillStyle = "rgba(8, 153, 129, 0.25)";
     context.fillRect(start.x, start.y, end.x - start.x, end.y - start.y);
-    context.fillStyle = "rgba(239, 83, 80, 0.25)";
+    context.fillStyle = "rgba(242, 54, 69, 0.25)";
     context.fillRect(start.x, start.y, end.x - start.x, stop.y - start.y);
     context.restore();
     line(start, { x: end.x, y: start.y });
@@ -172,7 +226,7 @@ function drawDrawing(
       const percent = first.price ? ` (${(difference / first.price * 100).toFixed(2)}%)` : "";
       const minutes = Math.abs(Number(last.time) - Number(first.time)) / 60;
       context.save();
-      context.fillStyle = "rgba(212, 168, 83, 0.15)";
+      context.globalAlpha = 0.15;
       context.fillRect(start.x, start.y, end.x - start.x, end.y - start.y);
       context.restore();
       context.fillText(`${Number(difference.toPrecision(6))}${percent} · ${minutes}m`, end.x + 4, end.y - 4);

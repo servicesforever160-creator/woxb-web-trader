@@ -20,8 +20,10 @@ export function PairSearchModal({ onClose, onAdd, addedSymbols, instruments }: P
   }, [onClose]);
 
   const filteredPairs = useMemo(() => {
-    const term = query.trim().toLowerCase();
-    return !term ? instruments : instruments.filter(({ symbol, name }) => `${symbol} ${name}`.toLowerCase().includes(term));
+    const term = query.trim().replaceAll("/", "").toLowerCase();
+    return !term ? instruments : instruments.filter(({ symbol, displaySymbol, name }) =>
+      `${displaySymbol ?? symbol} ${name}`.replaceAll("/", "").toLowerCase().includes(term),
+    );
   }, [query, instruments]);
 
   return (
@@ -42,7 +44,7 @@ export function PairSearchModal({ onClose, onAdd, addedSymbols, instruments }: P
               {filteredPairs.map((pair) => {
                 const isAdded = addedSymbols.includes(pair.symbol);
                 return <tr key={pair.symbol}>
-                  <td><div className="pair-name"><InstrumentIcon type={pair.icon} /><span><strong>{pair.symbol}</strong><small>{pair.name}</small></span></div></td>
+                  <td><div className="pair-name"><InstrumentIcon type={pair.icon} /><span><strong>{pair.displaySymbol ?? pair.symbol}</strong><small>{pair.name}</small></span></div></td>
                   <td>{pair.price}</td>
                   <td className={`pair-change ${pair.trend}`}>{pair.change ? `${pair.trend === "up" ? "+" : "-"}${pair.change}` : "—"}</td>
                   <td><Button variant="unstyled" type="button" className={`add-pair-button ${isAdded ? "is-added" : "is-available"}`} disabled={isAdded} onClick={() => onAdd(pair)}>{isAdded ? "✓ Added" : "+ Add"}</Button></td>

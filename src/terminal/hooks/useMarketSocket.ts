@@ -1,20 +1,36 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { disconnectSocket, getSocket } from "@/src/services/socket/socket";
-import type { MarketTick } from "@/src/types/market";
+import type { MarketQuotes, MarketQuoteSide, MarketTick } from "@/src/types/market";
 import { getBaseSymbol } from "../market-watch/symbols.data";
 import type { MarketSymbol } from "../market-watch/symbols.data";
 
 type TickListener = (tick: MarketTick) => void;
 
-type MarketSnapshot = {
-  status: "available";
-} & MarketTick | {
-  status: "unavailable";
-  symbol: string;
+export type SubscribeToMarketTicks = (listener: TickListener) => () => void;
+
+type SocketQuote = Omit<MarketTick, "price"> & {
+  price?: number;
+  bid?: number;
+  ask?: number;
 };
 
+type MarketSnapshot =
+  | (SocketQuote & { status: "available" })
+  | { status: "unavailable"; symbol: string };
+
+function finitePrice(price: number | undefined) {
+  return typeof price === "number" && Number.isFinite(price) ? price : undefined;
+}
+
+function updateSide(previous: MarketQuoteSide | undefined, price: number | undefined): MarketQuoteSide | undefined {
+  if (price === undefined || previous?.price === price) return previous;
+
+  const direction = previous ? (price > previous.price ? "up" : "down") : undefined;
+  return { price, direction };
+}
+
 export function useMarketSocket(symbols: MarketSymbol[]) {
-  const [prices, setPrices] = useState<Partial<Record<string, number>>>({});
+  const [quotes, setQuotes] = useState<MarketQuotes>({});
   const listeners = useRef(new Set<TickListener>());
 
   const subscribeToTicks = useCallback((listener: TickListener) => {
@@ -36,22 +52,35 @@ export function useMarketSocket(symbols: MarketSymbol[]) {
       socket.emit("market:subscribe", { symbols: accountSymbols });
     };
 
-    const receivePrice = (tick: MarketTick) => {
-      if (typeof tick?.symbol !== "string" || !Number.isFinite(tick.price)) return;
+    const receivePrice = (tick: SocketQuote) => {
+      if (typeof tick?.symbol !== "string") return;
 
       const symbol = symbolsByKey.get(getBaseSymbol(tick.symbol));
       if (!symbol) return;
 
-      const { timestamp, price } = tick;
+      const { timestamp } = tick;
+      const ask = finitePrice(tick.ask);
+      const bid = finitePrice(tick.bid) ?? (ask === undefined ? finitePrice(tick.price) : undefined);
+      if (bid === undefined && ask === undefined) return;
+
       const latest = latestTimes.get(symbol);
       if (typeof timestamp !== "number" || !Number.isFinite(timestamp) || latest === undefined || timestamp >= latest) {
         if (typeof timestamp === "number" && Number.isFinite(timestamp)) {
           latestTimes.set(symbol, timestamp);
         }
-        setPrices((current) => current[symbol] === price ? current : { ...current, [symbol]: price });
+        setQuotes((current) => {
+          const previous = current[symbol];
+          const nextBid = updateSide(previous?.bid, bid);
+          const nextAsk = updateSide(previous?.ask, ask);
+          if (previous?.bid === nextBid && previous?.ask === nextAsk) return current;
+
+          return { ...current, [symbol]: { bid: nextBid, ask: nextAsk } };
+        });
       }
 
-      for (const listener of listeners.current) listener({ ...tick, symbol });
+      if (bid !== undefined) {
+        for (const listener of listeners.current) listener({ symbol, timestamp, price: bid });
+      }
     };
 
     const receiveSnapshot = (snapshot: MarketSnapshot) => {
@@ -72,5 +101,5 @@ export function useMarketSocket(symbols: MarketSymbol[]) {
     };
   }, [symbols]);
 
-  return { prices, subscribeToTicks };
+  return { quotes, subscribeToTicks };
 }

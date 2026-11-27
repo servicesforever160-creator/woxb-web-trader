@@ -34,8 +34,10 @@ export default function TerminalGrid({
   const [activeTab, setActiveTab] = useState<TerminalTab>("market-watch");
   const { theme, toggleTheme } = useTheme();
   const market = useMarketSymbols();
-  const { prices, subscribeToTicks } = useMarketSocket(market.symbols);
-  const topbarInstruments = useTopbarInstruments(market.symbols, prices);
+  const { quotes, subscribeToTicks } = useMarketSocket(market.symbols);
+  const topbarInstruments = useTopbarInstruments(market.symbols, quotes);
+  const { activeSymbol } = topbarInstruments;
+  const displaySymbol = market.symbols.find(({ symbol }) => symbol === activeSymbol)?.displaySymbol ?? activeSymbol;
   const trades = useTradeActions();
 
   return (
@@ -46,6 +48,7 @@ export default function TerminalGrid({
           {...topbarInstruments}
           theme={theme}
           onThemeToggle={toggleTheme}
+          subscribeToTicks={subscribeToTicks}
         />
       </div>
       <div className="settings-bar">
@@ -64,8 +67,8 @@ export default function TerminalGrid({
               {activeTab === "market-watch" ? (
                 <MarketWatch
                   market={market}
-                  prices={prices}
-                  activeSymbol={topbarInstruments.activeSymbol}
+                  quotes={quotes}
+                  activeSymbol={activeSymbol}
                   onSelect={topbarInstruments.setActiveSymbol}
                 />
               ) : (
@@ -81,10 +84,11 @@ export default function TerminalGrid({
               <Group orientation="vertical" className="chart-panels">
                 <Panel defaultSize={75} minSize={40}>
                   <div className="chart-panel-content">
-                    {topbarInstruments.activeSymbol && (
+                    {activeSymbol && (
                       <ChartArea
-                        key={topbarInstruments.activeSymbol}
-                        symbol={topbarInstruments.activeSymbol}
+                        key={activeSymbol}
+                        symbol={activeSymbol}
+                        displaySymbol={displaySymbol}
                         theme={theme}
                         subscribeToTicks={subscribeToTicks}
                       />
@@ -114,7 +118,8 @@ export default function TerminalGrid({
         <OrderPanel
           key={accountId}
           accountId={accountId}
-          symbol={topbarInstruments.activeSymbol}
+          symbol={activeSymbol}
+          displaySymbol={displaySymbol}
           busy={trades.busy}
           onOpen={trades.open}
         />

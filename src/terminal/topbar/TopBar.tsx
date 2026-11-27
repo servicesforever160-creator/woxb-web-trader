@@ -12,41 +12,38 @@ import { Moon, Sun } from "lucide-react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import AccountCard from "./AccountCard";
-
-function TrendChart({ trend }: { trend: Instrument["trend"] }) {
-  const isUp = trend === "up";
-  const points = isUp
-    ? "0,30 11,27 22,28 34,19 45,21 57,11 68,13 80,3"
-    : "0,7 11,12 22,10 34,18 45,16 57,25 68,23 80,32";
-
-  return (
-    <svg className={`ticker-trend ${trend}`} viewBox="0 0 80 38" aria-hidden="true">
-      <polyline points={points} />
-      <polygon points={`${points} 80,38 0,38`} />
-    </svg>
-  );
-}
-
+import TickerAreaChart from "./TickerAreaChart";
+import type { SubscribeToMarketTicks } from "../hooks/useMarketSocket";
 
 type TickerCardProps = {
   ticker: Instrument;
   active: boolean;
   onSelect: (symbol: string) => void;
+  subscribeToTicks: SubscribeToMarketTicks;
 };
 
-function TickerCard({ ticker, active, onSelect }: TickerCardProps) {
+function TickerCard({ ticker, active, onSelect, subscribeToTicks }: TickerCardProps) {
   const isUp = ticker.trend === "up";
   return (
-    <Button variant="unstyled" type="button" className={`ticker-card !transition-all !duration-300 !ease-out hover:-translate-y-0.5 hover:shadow-[0_6px_18px_rgba(212,168,83,0.14)] active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#F5B800]/40 motion-reduce:transform-none motion-reduce:!transition-none${active ? " active shadow-[0_5px_16px_rgba(212,168,83,0.18)]" : ""}`} onClick={() => onSelect(ticker.symbol)} aria-pressed={active}>
+    <Button
+      variant="unstyled"
+      type="button"
+      className={`ticker-card !transition-all !duration-300 !ease-out hover:-translate-y-0.5 hover:shadow-[0_6px_18px_rgba(212,168,83,0.14)] active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#F5B800]/40 motion-reduce:transform-none motion-reduce:!transition-none${active ? " active shadow-[0_5px_16px_rgba(212,168,83,0.18)]" : ""}`}
+      onClick={() => onSelect(ticker.symbol)}
+      aria-pressed={active}
+      data-price-direction={ticker.priceDirection}
+    >
       <InstrumentIcon type={ticker.icon} />
       <div className="ticker-copy">
-        <span className="ticker-symbol">{ticker.symbol}</span>
-        <strong className="ticker-price">{ticker.price}</strong>
+        <span className="ticker-symbol">{ticker.displaySymbol ?? ticker.symbol}</span>
+        <strong className="ticker-price">
+          {ticker.price}
+        </strong>
         {ticker.change && (
           <span className={`ticker-change ${ticker.trend}`}><span className="change-arrow">{isUp ? "▲" : "▼"}</span>{ticker.change}</span>
         )}
       </div>
-      {ticker.change && <TrendChart trend={ticker.trend} />}
+      <TickerAreaChart symbol={ticker.symbol} subscribeToTicks={subscribeToTicks} />
     </Button>
   );
 }
@@ -57,6 +54,7 @@ type TopBarProps = ReturnType<typeof useTopbarInstruments> & {
   accountDetails: AccountDetail[];
   theme: Theme;
   onThemeToggle: () => void;
+  subscribeToTicks: SubscribeToMarketTicks;
 };
 
 export default function TopBar({
@@ -69,6 +67,7 @@ export default function TopBar({
   addedSymbols,
   theme,
   onThemeToggle,
+  subscribeToTicks,
 }: TopBarProps) {
   const [isInstrumentModalOpen, setIsInstrumentModalOpen] = useState(false);
 
@@ -113,7 +112,15 @@ export default function TopBar({
         </span>
       </Link>
       <div className="ticker-list" aria-label="Market ticker">
-        {instruments.map((ticker) => <TickerCard key={ticker.symbol} ticker={ticker} active={ticker.symbol === activeSymbol} onSelect={setActiveSymbol} />)}
+        {instruments.map((ticker) => (
+          <TickerCard
+            key={ticker.symbol}
+            ticker={ticker}
+            active={ticker.symbol === activeSymbol}
+            onSelect={setActiveSymbol}
+            subscribeToTicks={subscribeToTicks}
+          />
+        ))}
       </div>
       <AccountCard details={accountDetails} />
       <div className="topbar-actions">

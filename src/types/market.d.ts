@@ -40,6 +40,18 @@ export type MarketTick = {
   timestamp?: number;
 };
 
+export type MarketQuoteSide = {
+  price: number;
+  direction?: "up" | "down";
+};
+
+export type MarketQuote = {
+  bid?: MarketQuoteSide;
+  ask?: MarketQuoteSide;
+};
+
+export type MarketQuotes = Partial<Record<string, MarketQuote>>;
+
 export type MarketPriceHandler = (
   symbol: string,
   price: number,

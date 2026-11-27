@@ -11,6 +11,8 @@ import "./ChartArea.css";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Candle, MarketTick } from "@/src/types/market";
 import ChartHeader from "./ChartHeader";
+import ChartControls, { DEFAULT_CHART_SETTINGS } from "./ChartControls";
+import type { ChartSettings } from "./ChartControls";
 import TradingChart from "./TradingChart";
 import type { Theme } from "../hooks/useTheme";
 import { fetchMarketHistory } from "../utils/fetchMarketHistory";
@@ -31,38 +33,50 @@ type Timeframe = keyof typeof TIMEFRAMES;
 
 export default function ChartArea({
   symbol,
+  displaySymbol,
   theme,
   subscribeToTicks,
 }: {
   symbol: string;
+  displaySymbol: string;
   theme: Theme;
   subscribeToTicks: (listener: (tick: MarketTick) => void) => () => void;
 }) {
   const [interval, setInterval] = useState<Timeframe>("5min");
+  const [settings, setSettings] = useState(DEFAULT_CHART_SETTINGS);
 
   return (
     <ChartSession
       key={`${symbol}:${interval}`}
       symbol={symbol}
+      displaySymbol={displaySymbol}
       theme={theme}
       subscribeToTicks={subscribeToTicks}
       interval={interval}
       onIntervalChange={setInterval}
+      settings={settings}
+      onSettingsChange={setSettings}
     />
   );
 }
 
 function ChartSession({
   symbol,
+  displaySymbol,
   theme,
   interval,
   onIntervalChange,
+  settings,
+  onSettingsChange,
   subscribeToTicks,
 }: {
   symbol: string;
+  displaySymbol: string;
   theme: Theme;
   interval: Timeframe;
   onIntervalChange: (interval: Timeframe) => void;
+  settings: ChartSettings;
+  onSettingsChange: (settings: ChartSettings) => void;
   subscribeToTicks: (listener: (tick: MarketTick) => void) => () => void;
 }) {
   const [history, setHistory] = useState<ChartHistory>();
@@ -154,8 +168,9 @@ function ChartSession({
   return (
     <div className="chart-container">
       <ChartHeader
-        symbol={symbol}
+        symbol={displaySymbol}
         candle={candles.at(-1)}
+        controls={<ChartControls settings={settings} onChange={onSettingsChange} />}
         timeframe={
           <Select
             value={interval}
@@ -176,7 +191,7 @@ function ChartSession({
       />
 
       <div className="chart-body">
-        <TradingChart symbol={symbol} theme={theme} candles={candles} onLoadOlder={loadOlder}>
+        <TradingChart symbol={symbol} theme={theme} candles={candles} settings={settings} onLoadOlder={loadOlder}>
           {status && (
             <div className="chart-status" role="status">
               {status}

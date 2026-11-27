@@ -23,8 +23,9 @@ export async function fetchMarketHistory(
   interval: string,
   to: number | undefined,
   signal: AbortSignal,
+  outputSize = 200,
 ): Promise<Candle[]> {
-  const response = await getMarketHistory(symbol, interval, 200, to, signal);
+  const response = await getMarketHistory(symbol, interval, outputSize, to, signal);
 
   if (!response.success) {
     throw new Error(response.message);

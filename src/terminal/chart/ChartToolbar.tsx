@@ -128,7 +128,7 @@ export default function ChartToolbar({ active, locked, onAction }: ChartToolbarP
                 className={`
                   tool-bar-icons flex h-12 w-12 items-center justify-center
                   [&>svg]:!h-[26px] [&>svg]:!w-[26px] transition disabled:opacity-40
-                  ${active[label] ? "text-[var(--terminal-text)] bg-[var(--terminal-muted)]" : "text-[var(--terminal-muted-text)] hover:text-[var(--terminal-text)] hover:bg-[var(--terminal-muted)]"}
+                  ${active[label] ? "text-[#2962ff] bg-[#2962ff]/10" : "text-[var(--terminal-muted-text)] hover:text-[var(--terminal-text)] hover:bg-[var(--terminal-muted)]"}
                 `}
               >
                 {icon}

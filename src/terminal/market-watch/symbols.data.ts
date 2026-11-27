@@ -5,6 +5,7 @@ export type MarketSymbol = {
   accountSymbol: string;
   baseSymbol: string;
   symbol: string;
+  displaySymbol: string;
   category: string;
 };
 
@@ -19,8 +20,10 @@ export function toMarketSymbols(categories: MarketSymbols): MarketSymbol[] {
       const known = INSTRUMENTS.find((instrument) => getBaseSymbol(instrument.symbol) === baseSymbol);
       const pair = /^(.*?)(USDT|USDC|USD|EUR|GBP|JPY|CHF|CAD|AUD|NZD|BTC|ETH)$/.exec(baseSymbol);
       const symbol = known?.symbol ?? (pair && pair[1] ? `${pair[1]}/${pair[2]}` : baseSymbol);
+      const suffixStart = accountSymbol.indexOf(".");
+      const displaySymbol = suffixStart === -1 ? symbol : symbol + accountSymbol.slice(suffixStart);
 
-      return { accountSymbol, baseSymbol, symbol, category };
+      return { accountSymbol, baseSymbol, symbol, displaySymbol, category };
     }),
   );
 }

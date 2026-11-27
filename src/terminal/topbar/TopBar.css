@@ -1,3 +1,5 @@
+@reference "../../../app/globals.css";
+
 .top-bar-panel {
   box-sizing: border-box;
   display: flex;
@@ -66,6 +68,8 @@
 }
 
 .ticker-card {
+  --ticker-price-color: var(--terminal-text);
+
   display: grid;
   grid-template-columns: 28px minmax(68px, auto) 60px;
   align-items: center;
@@ -202,12 +206,20 @@
 }
 
 .ticker-price {
-  color: var(--terminal-text);
+  color: var(--ticker-price-color);
 
   font-size: 13px;
   font-weight: 750;
   line-height: 14px;
   letter-spacing: 0.1px;
+}
+
+.ticker-card[data-price-direction="up"] {
+  --ticker-price-color: var(--color-emerald-500);
+}
+
+.ticker-card[data-price-direction="down"] {
+  --ticker-price-color: var(--color-red-500);
 }
 
 .ticker-change {
@@ -236,31 +248,16 @@
   height: 28px;
 }
 
-.ticker-trend polyline {
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.ticker-trend-flat {
+  display: grid;
+  align-items: center;
+  padding-inline: 1px;
 }
 
-.ticker-trend polygon {
-  opacity: 0.14;
-}
-
-.ticker-trend.up polyline {
-  stroke: #11c982;
-}
-
-.ticker-trend.up polygon {
-  fill: #11c982;
-}
-
-.ticker-trend.down polyline {
-  stroke: #ff4e5c;
-}
-
-.ticker-trend.down polygon {
-  fill: #ff4e5c;
+.ticker-trend-flat::before {
+  content: "";
+  height: 1.5px;
+  background: var(--ticker-price-color);
 }
 
 

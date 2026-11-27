@@ -14,11 +14,9 @@ import {
   projectDrawingPoint,
 } from "./tools/chartDrawings";
 import type { ChartDrawing, DrawingPoint, DrawingTool } from "./tools/chartDrawings";
-
-const CHART_COLORS = {
-  dark: { background: "#111118", text: "#8888A0", grid: "rgba(212, 168, 83, 0.18)" },
-  light: { background: "#EFEFF4", text: "#6F7080", grid: "rgba(22, 22, 29, 0.12)" },
-};
+import type { ChartSettings } from "./ChartControls";
+import { CANDLE_COLORS, createChartSeries } from "./chartSeries";
+import type { ChartCandle } from "./chartSeries";
 
 function isCandlestick(bar: { time: Time }): bar is CandlestickData {
   return "open" in bar;
@@ -28,14 +26,16 @@ type TradingChartProps = {
   symbol: string;
   theme: Theme;
   candles: Candle[];
+  settings: ChartSettings;
   onLoadOlder: () => void;
   children: ReactNode;
 };
 
-export default function TradingChart({ symbol, theme, candles, onLoadOlder, children }: TradingChartProps) {
+export default function TradingChart({ symbol, theme, candles, settings, onLoadOlder, children }: TradingChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
+  const updateChartSeries = useRef<ReturnType<typeof createChartSeries> | null>(null);
   const firstTimeRef = useRef<UTCTimestamp | undefined>(undefined);
   const updatingDataRef = useRef(false);
   const renderDrawingsRef = useRef<ReturnType<typeof createDrawingLayer> | null>(null);
@@ -295,7 +295,12 @@ export default function TradingChart({ symbol, theme, candles, onLoadOlder, chil
   useEffect(() => {
     const container = chartContainerRef.current;
     if (!container) return;
-    const colors = CHART_COLORS[theme];
+    const styles = getComputedStyle(container);
+    const colors = {
+      background: styles.getPropertyValue("--terminal-card").trim(),
+      text: styles.getPropertyValue("--terminal-muted-text").trim(),
+      grid: styles.getPropertyValue("--terminal-border").trim(),
+    };
 
     const chart = createChart(container, {
       width: container.clientWidth,
@@ -331,6 +336,7 @@ export default function TradingChart({ symbol, theme, candles, onLoadOlder, chil
     const precision = symbol.endsWith("/JPY") ? 3 : symbol.startsWith("BTC/") || symbol.startsWith("XAU/") ? 2 : 5;
 
     const series = chart.addSeries(CandlestickSeries, {
+      ...CANDLE_COLORS,
       priceFormat: {
         type: "price",
         precision,
@@ -339,6 +345,7 @@ export default function TradingChart({ symbol, theme, candles, onLoadOlder, chil
     });
     seriesRef.current = series;
     renderDrawingsRef.current = createDrawingLayer(chart, series);
+    updateChartSeries.current = createChartSeries(chart, series);
 
     chart.timeScale().subscribeVisibleLogicalRangeChange((range) => checkHistory(range));
     chart.subscribeClick(({ point, paneIndex }) => {
@@ -364,6 +371,7 @@ export default function TradingChart({ symbol, theme, candles, onLoadOlder, chil
       chartRef.current = null;
       seriesRef.current = null;
       renderDrawingsRef.current = null;
+      updateChartSeries.current = null;
       firstTimeRef.current = undefined;
     };
   }, [symbol, theme]);
@@ -373,7 +381,7 @@ export default function TradingChart({ symbol, theme, candles, onLoadOlder, chil
     const series = seriesRef.current;
     if (!chart || !series) return;
 
-    const candlesByTime = new Map<UTCTimestamp, CandlestickData<UTCTimestamp>>();
+    const candlesByTime = new Map<UTCTimestamp, ChartCandle>();
 
     for (const candle of candles) {
       const time = Math.floor(Date.parse(candle.date) / 1000) as UTCTimestamp;
@@ -381,7 +389,7 @@ export default function TradingChart({ symbol, theme, candles, onLoadOlder, chil
 
       if (![time, open, high, low, close].every(Number.isFinite)) continue;
 
-      candlesByTime.set(time, { time, open, high, low, close });
+      candlesByTime.set(time, { time, open, high, low, close, volume: candle.volume });
     }
 
     const chartCandles = [...candlesByTime.values()].sort(
@@ -395,6 +403,7 @@ export default function TradingChart({ symbol, theme, candles, onLoadOlder, chil
     updatingDataRef.current = true;
     try {
       series.setData(chartCandles);
+      updateChartSeries.current?.(chartCandles, settings);
 
       if (firstTime !== undefined && previousFirstTime === undefined) {
         scale.fitContent();
@@ -409,7 +418,7 @@ export default function TradingChart({ symbol, theme, candles, onLoadOlder, chil
     } finally {
       updatingDataRef.current = false;
     }
-  }, [symbol, theme, candles]);
+  }, [symbol, theme, candles, settings]);
 
   useEffect(() => {
     chartRef.current?.applyOptions({

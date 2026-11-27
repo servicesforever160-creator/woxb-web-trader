@@ -5,10 +5,12 @@ export default function ChartHeader({
   symbol,
   candle,
   timeframe,
+  controls,
 }: {
   symbol: string;
   candle?: Candle;
   timeframe: ReactNode;
+  controls: ReactNode;
 }) {
   return (
     <div className="chart-header">
@@ -18,6 +20,7 @@ export default function ChartHeader({
       </div>
 
       {timeframe}
+      {controls}
 
       {candle && (
         <div className="chart-ohlc">

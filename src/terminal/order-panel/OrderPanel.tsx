@@ -7,6 +7,7 @@ import type { OpenTradeRequest } from "@/src/services/api/trade/trade.types";
 type OrderPanelProps = {
   accountId?: string;
   symbol: string;
+  displaySymbol: string;
   busy: boolean;
   onOpen: (payload: OpenTradeRequest) => Promise<{ success: boolean; message: string }>;
 };
@@ -16,7 +17,7 @@ function readOptionalPrice(values: FormData, name: string) {
   return typeof value === "string" && value !== "" ? Number(value) : undefined;
 }
 
-export default function OrderPanel({ accountId, symbol, busy, onOpen }: OrderPanelProps) {
+export default function OrderPanel({ accountId, symbol, displaySymbol, busy, onOpen }: OrderPanelProps) {
   const [feedback, setFeedback] = useState<{ success: boolean; message: string }>();
   const [base, quote] = symbol.split("/");
 
@@ -58,7 +59,7 @@ export default function OrderPanel({ accountId, symbol, busy, onOpen }: OrderPan
       <form aria-label="Market trade" onSubmit={submitTrade} className="mb-4">
         <div className="mb-4 flex items-center justify-between">
           <span className="text-sm font-semibold">Market</span>
-          <strong className="text-sm">{symbol}</strong>
+          <strong className="text-sm">{displaySymbol}</strong>
         </div>
 
         <fieldset disabled={busy || !accountId || !symbol} className="min-w-0 space-y-3">

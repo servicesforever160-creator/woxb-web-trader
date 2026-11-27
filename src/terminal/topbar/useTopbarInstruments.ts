@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import type { MarketQuotes } from "@/src/types/market";
 import { DEFAULT_TOPBAR_SYMBOLS, INSTRUMENTS } from "./instruments.data";
 import type { Instrument } from "./instruments.data";
 import type { MarketSymbol } from "../market-watch/symbols.data";
@@ -7,27 +8,29 @@ const getInstrument = (symbol: string) => INSTRUMENTS.find((instrument) => instr
 
 export function useTopbarInstruments(
   marketSymbols: MarketSymbol[],
-  prices: Partial<Record<string, number>>,
+  quotes: MarketQuotes,
 ) {
   const [symbols, setSymbols] = useState(DEFAULT_TOPBAR_SYMBOLS);
   const [selectedSymbol, setActiveSymbol] = useState(DEFAULT_TOPBAR_SYMBOLS[0]);
 
   const availableInstruments = useMemo(() => {
     const available = new Map<string, Instrument>();
-    for (const { symbol } of marketSymbols) {
-      const price = prices[symbol];
+    for (const { symbol, displaySymbol } of marketSymbols) {
+      const bid = quotes[symbol]?.bid;
       const instrument = getInstrument(symbol);
       available.set(symbol, {
         symbol,
+        displaySymbol,
         name: instrument?.name ?? symbol,
         icon: instrument?.icon ?? "coin",
-        price: price?.toLocaleString("en-US", { maximumFractionDigits: 8 }) ?? "—",
+        price: bid?.price.toLocaleString("en-US", { maximumFractionDigits: 8 }) ?? "—",
+        priceDirection: bid?.direction,
         change: "",
         trend: "up",
       });
     }
     return available;
-  }, [marketSymbols, prices]);
+  }, [marketSymbols, quotes]);
 
   const instruments = symbols.flatMap((symbol) => {
     const instrument = availableInstruments.get(symbol);
