@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getOpenTrades } from "@/src/services/api/trade/get-open-trades.api";
 import type { SubscribeToTradeEvents, Trade, TradeSocketEvent } from "@/src/services/api/trade/trade.types";
 
-type TradeChange = Exclude<TradeSocketEvent, { type: "reconnect" }>;
+type TradeChange = Extract<TradeSocketEvent, { trade: Trade }>;
 
 function applyTradeChange(positions: Map<string, Trade>, { type, trade }: TradeChange) {
   if (type === "close") {
@@ -64,6 +64,8 @@ export function useLivePositions(accountId: string | undefined, subscribeToTrade
     }
 
     const unsubscribe = subscribeToTrades((event) => {
+      if (event.type === "execution") return;
+
       if (event.type === "reconnect") {
         setReconnects((current) => current + 1);
         void loadPositions();

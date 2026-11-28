@@ -16,6 +16,11 @@ export type CloseTradeRequest = {
   price?: number;
 };
 
+export type OpenTradeSubmission = {
+  key: string;
+  body: string;
+};
+
 export type Trade = {
   id: string;
   account_id?: string;
@@ -36,6 +41,7 @@ export type Trade = {
 
 export type TradeSocketEvent =
   | { type: "open" | "update" | "close"; trade: Trade }
+  | { type: "execution"; payload: unknown }
   | { type: "reconnect" };
 
 export type SubscribeToTradeEvents = (listener: (event: TradeSocketEvent) => void) => () => void;

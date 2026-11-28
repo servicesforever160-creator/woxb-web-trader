@@ -8,5 +8,5 @@ export default function TerminalLayout({
   accountId?: string;
   accountDetails: AccountDetail[];
 }) {
-  return <TerminalGrid accountId={accountId} accountDetails={accountDetails} />;
+  return <TerminalGrid key={accountId} accountId={accountId} accountDetails={accountDetails} />;
 }

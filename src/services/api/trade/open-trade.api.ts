@@ -1,7 +1,28 @@
+import { isAxiosError } from "axios";
 import { ENDPOINTS, post } from "../core";
 import { tradeRequest } from "./trade-request";
-import type { OpenTradeRequest, Trade } from "./trade.types";
+import type { OpenTradeSubmission, Trade } from "./trade.types";
 
-export function openTrade(payload: OpenTradeRequest) {
-  return tradeRequest<Trade>((config) => post(ENDPOINTS.TRADE.OPEN, payload, config));
+export async function openTrade({ key, body }: OpenTradeSubmission) {
+  let outcomeUnknown = false;
+  const result = await tradeRequest<Trade | undefined>(async (config) => {
+    try {
+      return await post(ENDPOINTS.TRADE.OPEN, body, {
+        ...config,
+        headers: {
+          ...config.headers,
+          "Content-Type": "application/json",
+          "Idempotency-Key": key,
+        },
+      });
+    } catch (error) {
+      if (isAxiosError(error)) {
+        const status = error.response?.status;
+        outcomeUnknown = status === undefined || status === 408 || status >= 500;
+      }
+      throw error;
+    }
+  });
+
+  return { ...result, outcomeUnknown };
 }

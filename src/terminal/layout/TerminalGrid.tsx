@@ -34,11 +34,17 @@ export default function TerminalGrid({
   const [activeTab, setActiveTab] = useState<TerminalTab>("market-watch");
   const { theme, toggleTheme } = useTheme();
   const market = useMarketSymbols();
-  const { quotes, subscribeToTicks, subscribeToTrades } = useMarketSocket(market.symbols);
+  const { quotes, subscribeToTicks, subscribeToTrades, isTradeSocketConnected } = useMarketSocket(market.symbols);
   const topbarInstruments = useTopbarInstruments(market.symbols, quotes);
   const { activeSymbol } = topbarInstruments;
   const displaySymbol = market.symbols.find(({ symbol }) => symbol === activeSymbol)?.displaySymbol ?? activeSymbol;
-  const trades = useTradeActions();
+  const accountMode = accountDetails.find(({ label }) => label === "Mode")?.value.trim().toUpperCase();
+  const trades = useTradeActions({
+    accountId,
+    isRealAccount: accountMode === "REAL",
+    subscribeToTrades,
+    isTradeSocketConnected,
+  });
 
   return (
     <div className={`terminal ${theme}`}>
@@ -122,6 +128,9 @@ export default function TerminalGrid({
           displaySymbol={displaySymbol}
           busy={trades.busy}
           onOpen={trades.open}
+          openPhase={trades.openPhase}
+          openFeedback={trades.openFeedback}
+          onRetryOpen={trades.retryOpen}
         />
       </div>
 

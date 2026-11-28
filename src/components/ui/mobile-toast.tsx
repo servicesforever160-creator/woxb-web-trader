@@ -130,7 +130,7 @@ export function MobileToastDrawer() {
                     <Button
                         {...action}
                         type="button"
-                        variant={"destructive_fill"}
+                        variant={"destructive"}
                         className={`w-full ${toastData?.type === "success" ? "bg-green-600" : toastData?.type === "error" ? "bg-red-500" : ""}`}
                         onClick={(event) => {
                             action?.onClick?.(event)

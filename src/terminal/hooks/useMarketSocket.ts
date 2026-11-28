@@ -48,6 +48,7 @@ export function useMarketSocket(symbols: MarketSymbol[]) {
     subscribers.add(listener);
     return () => { subscribers.delete(listener); };
   }, []);
+  const isTradeSocketConnected = useCallback(() => socketRef.current?.connected === true, []);
 
   useEffect(() => {
     const accessToken = sessionStorage.getItem("accessToken");
@@ -62,6 +63,7 @@ export function useMarketSocket(symbols: MarketSymbol[]) {
     };
     const onOpen = (trade: Trade) => publish({ type: "open", trade });
     const onUpdate = (trade: Trade) => publish({ type: "update", trade });
+    const onExecution = (payload: unknown) => publish({ type: "execution", payload });
     const onClose = (payload: { trade: Trade }) => {
       if (payload?.trade) publish({ type: "close", trade: payload.trade });
     };
@@ -73,12 +75,14 @@ export function useMarketSocket(symbols: MarketSymbol[]) {
     socket.on("trade:open", onOpen);
     socket.on("trade:update", onUpdate);
     socket.on("trade:close", onClose);
+    socket.on("trade:execution", onExecution);
     socket.on("connect", onConnect);
 
     return () => {
       socket.off("trade:open", onOpen);
       socket.off("trade:update", onUpdate);
       socket.off("trade:close", onClose);
+      socket.off("trade:execution", onExecution);
       socket.off("connect", onConnect);
       socketRef.current = null;
       disconnectSocket();
@@ -145,5 +149,5 @@ export function useMarketSocket(symbols: MarketSymbol[]) {
     };
   }, [symbols]);
 
-  return { quotes, subscribeToTicks, subscribeToTrades };
+  return { quotes, subscribeToTicks, subscribeToTrades, isTradeSocketConnected };
 }

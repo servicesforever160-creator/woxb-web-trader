@@ -3,13 +3,17 @@ import "./OrderPanel.css";
 import { useState } from "react";
 import type { FormEvent } from "react";
 import type { OpenTradeRequest } from "@/src/services/api/trade/trade.types";
+import type { PendingOpenTrade } from "../utils/openTradeSubmission";
 
 type OrderPanelProps = {
   accountId?: string;
   symbol: string;
   displaySymbol: string;
   busy: boolean;
-  onOpen: (payload: OpenTradeRequest) => Promise<{ success: boolean; message: string }>;
+  onOpen: (payload: OpenTradeRequest) => void;
+  openPhase?: PendingOpenTrade["phase"];
+  openFeedback?: { success: boolean; message: string };
+  onRetryOpen: () => void;
 };
 
 function readOptionalPrice(values: FormData, name: string) {
@@ -17,13 +21,22 @@ function readOptionalPrice(values: FormData, name: string) {
   return typeof value === "string" && value !== "" ? Number(value) : undefined;
 }
 
-export default function OrderPanel({ accountId, symbol, displaySymbol, busy, onOpen }: OrderPanelProps) {
-  const [feedback, setFeedback] = useState<{ success: boolean; message: string }>();
+export default function OrderPanel({
+  accountId,
+  symbol,
+  displaySymbol,
+  busy,
+  onOpen,
+  openPhase,
+  openFeedback,
+  onRetryOpen,
+}: OrderPanelProps) {
+  const [validationError, setValidationError] = useState("");
   const [base, quote] = symbol.split("/");
 
-  async function submitTrade(event: FormEvent<HTMLFormElement>) {
+  function submitTrade(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!accountId || !symbol || busy) return;
+    if (!accountId || !symbol || busy || openPhase) return;
 
     const submitter = (event.nativeEvent as SubmitEvent).submitter;
     if (!(submitter instanceof HTMLButtonElement)) return;
@@ -39,19 +52,19 @@ export default function OrderPanel({ accountId, symbol, displaySymbol, busy, onO
     if (!Number.isFinite(lots) || lots <= 0 || [stopLoss, takeProfit].some(
       (price) => price !== undefined && (!Number.isFinite(price) || price <= 0),
     )) {
-      setFeedback({ success: false, message: "Enter positive values for lots and any exit prices." });
+      setValidationError("Enter positive values for lots and any exit prices.");
       return;
     }
 
-    setFeedback(undefined);
-    setFeedback(await onOpen({
+    setValidationError("");
+    onOpen({
       account_id: accountId,
       symbol,
       type: side,
       lots,
       stop_loss: stopLoss,
       take_profit: takeProfit,
-    }));
+    });
   }
 
   return (
@@ -62,7 +75,7 @@ export default function OrderPanel({ accountId, symbol, displaySymbol, busy, onO
           <strong className="text-sm">{displaySymbol}</strong>
         </div>
 
-        <fieldset disabled={busy || !accountId || !symbol} className="min-w-0 space-y-3">
+        <fieldset disabled={busy || !!openPhase || !accountId || !symbol} className="min-w-0 space-y-3">
           <label className="block text-sm">
             <span className="mb-1 block">Volume (lots)</span>
             <input
@@ -122,10 +135,21 @@ export default function OrderPanel({ accountId, symbol, displaySymbol, busy, onO
         </fieldset>
 
         {!accountId && <p className="mt-2 text-sm">Start an account session to trade.</p>}
-        {busy && <p className="mt-2 text-sm" role="status">Processing trade?</p>}
-        {feedback && (
-          <p className="mt-2 text-sm" role={feedback.success ? "status" : "alert"}>
-            {feedback.message}
+        {openPhase === "sending" && <p className="mt-2 text-sm" role="status">Submitting trade...</p>}
+        {openPhase === "pending" && <p className="mt-2 text-sm" role="status">Pending execution</p>}
+        {openPhase === "uncertain" && (
+          <div className="mt-2 grid gap-2 text-sm">
+            <p role="status">Trade outcome unknown. Retry the original order.</p>
+            <Button type="button" variant="outline" size="sm" disabled={busy} onClick={onRetryOpen}>
+              Retry original order
+            </Button>
+          </div>
+        )}
+        {validationError ? (
+          <p className="mt-2 text-sm" role="alert">{validationError}</p>
+        ) : openFeedback && (
+          <p className="mt-2 text-sm" role={openFeedback.success ? "status" : "alert"}>
+            {openFeedback.message}
           </p>
         )}
       </form>
